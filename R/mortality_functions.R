@@ -17,11 +17,11 @@ m_comp <- function(){
   
   for(j in 1:n_frail){
     
-    #Frailty for each cohort
+    #Frailty for each study
     ui[j] ~ dnorm(mu, tau)
-    #Meanlog of lognormal distribution for each cohort
+    #Meanlog of lognormal distribution for each study
     meanlog[j] <- ui[j]
-    #Median of lognormal distribution for each cohort
+    #Median of lognormal distribution for each study
     med_ind[j] <- exp(meanlog[j])
     
     #Prediction of 1/5/10 year survival
@@ -50,7 +50,7 @@ m_comp <- function(){
   
   #Variance of the frailty distribution
   theta <- 1/tau
-  #sdlog of all survival densities (cohort-specific and overall)
+  #sdlog of all survival densities (study-specific and overall)
   sdlog <- sqrt(1/taulog)
   #Overall median
   med_comp <- exp(mu)
@@ -65,7 +65,7 @@ par_comp <- c("mu", "theta", "sdlog", "med_comp", "meanlog", "med_ind",
 
 m_sev <- function(){
   
-  #Frailty for each cohort
+  #Frailty for each study
   for(j in 1:n_frail){
     ui[j] ~ dnorm(alpha, tau)
   }
@@ -87,7 +87,7 @@ m_sev <- function(){
   
   #Variance of the frailty distribution
   theta <- 1/tau
-  #sdlog of all survival densities (cohort-specific and overall)
+  #sdlog of all survival densities (study-specific and overall)
   sdlog <- sqrt(1/taulog)
   #Overall median survival for each severity
   meanlog_min <- alpha
@@ -104,7 +104,7 @@ m_sev <- function(){
     pred_adv[t] <- 1 - plnorm(t, meanlog_adv, taulog)
   }
   
-  #Cohort-specific meanlog of the lognormal density and median survival
+  #study-specific meanlog of the lognormal density and median survival
   for(k in 1:n_study_sev){
     meanlog_ind[k] <- ui[frail2[k]] + bmod*study_sev_mod[k] + badv*study_sev_adv[k]
     med_ind[k] <- exp(meanlog_ind[k])
@@ -160,8 +160,8 @@ run_comp <- function(df, n.iter = 31000, n.burnin = 1000, n.thin = 30){
 
 run_sev <- function(df, n.iter = 61000, n.burnin = 1000, n.thin = 30){
   
-  #Getting information for each cohort
-  cohort_data <- df %>%
+  #Getting information for each study
+  study_data <- df %>%
     group_by(study_sev_num) %>%
     summarize(study_id_num = first(study_id_num),
               sev_mod = first(sev_mod),
@@ -177,10 +177,10 @@ run_sev <- function(df, n.iter = 61000, n.burnin = 1000, n.thin = 30){
              frail = df$study_id_num,
              sev_mod = df$sev_mod,
              sev_adv = df$sev_adv,
-             n_study_sev = nrow(cohort_data),
-             frail2 = cohort_data$study_id_num,
-             study_sev_mod = cohort_data$sev_mod,
-             study_sev_adv = cohort_data$sev_adv
+             n_study_sev = nrow(study_data),
+             frail2 = study_data$study_id_num,
+             study_sev_mod = study_data$sev_mod,
+             study_sev_adv = study_data$sev_adv
   )
   
   #Fitting model
@@ -209,10 +209,10 @@ getData <- function(data){
     select(study_id, study_id_num, study_sev, study_sev_num) %>%
     filter(!duplicated(study_sev))
   
-  #Finding n studies, severity groups, cohorts, individuals
+  #Finding n studies, severity groups, studys, individuals
   counts <- c("nStudies" = length(unique(data$study_id_num)),
               "nSeverity" = length(unique(data$study_sev)),
-              "nCohorts" = length(unique(data$cohort_id)),
+              "nstudys" = length(unique(data$study_id)),
               "nIndividuals" = nrow(data))
   
   return(list(tab, counts))
