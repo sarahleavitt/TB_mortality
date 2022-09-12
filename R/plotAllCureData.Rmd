@@ -1,0 +1,110 @@
+---
+title: "Plotting Cure Data"
+author: "Laura White"
+date: "9/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE,echo=FALSE)
+```
+
+```{r, include=F}
+library(ggplot2)
+library(reshape)
+library(reshape2)
+library(RColorBrewer)
+library(ggpubr)
+library(gridExtra)
+library(grid)
+library(scales)
+library(dplyr)
+library(data.table)
+library(xlsx)
+library(kableExtra)
+```
+
+## Background
+
+```{r,include=FALSE}
+setwd("C:/Users/lfwhite/Documents/GitHub/pre_chemo_tb")
+
+source("R/utils.R")
+
+#Reading in the study_id correspondence table
+studyid <- read.csv("data/study_id.csv")
+
+#Reading in cure data
+cureData <- read.csv("data/cure_data_all.csv")
+
+# add in author and date of study
+cureData2 <- inner_join(cureData,studyid,by="study_id")
+```
+
+This is a summary of all data that reported on natural recovery of individuals diagnosed with TB disease in the prechemotherapy era. There were `r length(unique(cureData2$first_author))` published papers with this data. Of these there were `r length(unique(cureData2$cohort_id))` cohorts with data. 
+
+## Overall plot of all data
+
+Note: one study reports data out to 20 years. Since all other data is within a 10 year framework, we truncate the plot at 10 years.
+
+In the following plots, we connect dots over time for longitudinal follow-up on individuals from the same cohort where loss to follow-up was tracked.
+
+```{r}
+# basic plot of cure rate by year with separate studies colored differently; 
+## data that is from the same cohort is connected with a line
+ggplot(cureData2,aes(x=interval_r,y=cureRate,group=cohort_id,color=first_author))+
+  geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
+  labs(title="Overall Data",x="Year since diagnosis",y="Probability of Natural Recovery",color="Author")
+
+# change so color denotes the year the study was published
+ggplot(cureData2,aes(x=interval_r,y=cureRate,group=cohort_id,color=year))+
+  geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
+  labs(title="Denote by publication year",x="Year since diagnosis",y="Probability of Natural Recovery",color="Pub. Year")
+
+# plot by sanatorium (Yes/No)
+ggplot(cureData2,aes(x=interval_r,y=cureRate,group=cohort_id,color=sanatorium))+
+  geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
+  labs(title="Sanatorium data denoted",x="Year since diagnosis",y="Probability of Natural Recovery")
+
+# change so color denotes severity, if noted
+ggplot(cureData2,aes(x=interval_r,y=cureRate,group=cohort_id,color=severity))+
+  geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
+  labs(title="Severity data",x="Year since diagnosis",y="Probability of Natural Recovery",color="Severity")
+
+
+```
+
+## Plots by severity
+Since severity seems to have a substantial impact on the outcomes here. We plot these separately.
+
+First a plot of the data without severity of any kind reported.
+
+```{r}
+# plot only those without severity
+ggplot(cureData2[cureData2$severity=="None",],aes(x=interval_r,y=cureRate,group=cohort_id,color=first_author))+
+  geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
+  labs(title="Studies without severity reported",x="Year since diagnosis",y="Probability of Natural Recovery",color="Author")
+```
+
+Second a plot of data with severity. One complexity is that severity is reported uniquely for one study of sanitoria patients from the Netherlands. Here individuals were called "positive" if they were positive for TB by microscopy upon entrance to the sanitorium, "negative" individuals were not, but presumably diagnosed clinically.
+
+We put this study with the other four papers that report using the three standard categories of minimal, moderate and far advanced disease. 
+
+```{r}
+# plot studies with severity reported
+ggplot(cureData2[cureData2$severity!="None",],aes(x=interval_r,y=cureRate,group=cohort_id,color=severity))+
+  geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
+  labs(title="Studies with severity reported",x="Year since diagnosis",y="Probability of Natural Recovery",color="Severity")
+```
+
+Finally we separate these studies from one another.
+```{r}
+# plot studies with severity reported
+ggplot(cureData2[cureData2$severity!="None" & cureData2$severity!="Negative" & cureData2$severity!="Positive",],aes(x=interval_r,y=cureRate,group=cohort_id,color=severity))+
+  geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
+  labs(title="Studies with standard severity categories",x="Year since diagnosis",y="Probability of Natural Recovery",color="Severity")
+
+ggplot(cureData2[cureData2$first_author=="Baart de la Faille",],aes(x=interval_r,y=cureRate,group=cohort_id,color=severity))+
+  geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
+  labs(title="Study with non-standard severity measure",x="Year since diagnosis",y="Probability of Natural Recovery",color="Severity")
+```

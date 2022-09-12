@@ -1,0 +1,13 @@
+"study_id","first_author","year","category","outcome","stratified","sanatorium","start_type","cure_time"
+"1029","Alling, Alling, Lincoln","1954, 1955","US post-1930","Mortality/Cure","Yes","No","Entry",3
+"5_1047","Bentley et al.","1954","Non-US","Mortality","No","Yes","Entry",NA
+"79_1023","Braeuning ","1936","Non-US","Mortality/Cure","Yes","No","Notification/diagnosis",4
+"94","Ferguson","1926","Non-US","Mortality","No","Yes","Entry",NA
+"93","Heise","1933","US post-1930","Mortality","Yes","Yes","Exit",NA
+"75_1035","Lissant Cox","1936","Non-US","Mortality","Yes","Yes","Entry",NA
+"44","Lowe","1954","Non-US","Mortality","No","No","Notification/diagnosis",NA
+"45","Mitchell","1955","US post-1930","Mortality/Cure","Yes","Yes","Entry",3
+"63","Rutledge et al.","1919","US pre-1930","Mortality","Yes","Yes","Exit",NA
+"67","Stephens","1941","US pre-1930","Mortality/Cure","Yes","Yes","Entry",3
+"75","Tattersall et al. ","1947","Non-US","Mortality","Yes","No","Notification/diagnosis",NA
+"90_1016","Zacks","1939","US pre-1930","Mortality","No","No","Entry",NA

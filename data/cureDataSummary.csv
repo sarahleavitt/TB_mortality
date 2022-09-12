@@ -1,0 +1,116 @@
+"","study_id","severity","n","first_author","year","1","2","3","4","5","6","7","8","9","10"
+"1","1029","Far advanced disease",39,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,NA,NA,NA,0.666666666666667
+"2","1029","Far advanced disease",45,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,NA,NA,0.666666666666667,NA
+"3","1029","Far advanced disease",55,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,NA,0.636363636363636,NA,NA
+"4","1029","Far advanced disease",64,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,0.609375,NA,NA,NA
+"5","1029","Far advanced disease",72,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,0.541666666666667,NA,NA,NA,NA
+"6","1029","Far advanced disease",85,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,0.529411764705882,NA,NA,NA,NA,NA
+"7","1029","Far advanced disease",99,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,0.535353535353535,NA,NA,NA,NA,NA,NA
+"8","1029","Far advanced disease",111,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,0.513513513513513,NA,NA,NA,NA,NA,NA,NA
+"9","1029","Far advanced disease",136,"Ailing, Ailing, Lincoln","1954, 1955",NA,0.205882352941176,NA,NA,NA,NA,NA,NA,NA,NA
+"10","1029","Far advanced disease",162,"Ailing, Ailing, Lincoln","1954, 1955",0.0123456790123457,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"11","1029","Far advanced disease",224,"Ailing, Ailing, Lincoln","1954, 1955",0.00446428571428571,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"12","1029","Minimal disease",128,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,NA,NA,NA,0.609375
+"13","1029","Minimal disease",158,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,NA,NA,0.626582278481013,NA
+"14","1029","Minimal disease",217,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,NA,0.557603686635945,NA,NA
+"15","1029","Minimal disease",263,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,0.627376425855513,NA,NA,NA
+"16","1029","Minimal disease",300,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,0.67,NA,NA,NA,NA
+"17","1029","Minimal disease",365,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,0.632876712328767,NA,NA,NA,NA,NA
+"18","1029","Minimal disease",426,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,0.678403755868545,NA,NA,NA,NA,NA,NA
+"19","1029","Minimal disease",439,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,0.79498861047836,NA,NA,NA,NA,NA,NA,NA
+"20","1029","Minimal disease",447,"Ailing, Ailing, Lincoln","1954, 1955",NA,0.791946308724832,NA,NA,NA,NA,NA,NA,NA,NA
+"21","1029","Minimal disease",448,"Ailing, Ailing, Lincoln","1954, 1955",0.765625,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"22","1029","Moderately advanced disease",72,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,NA,NA,NA,0.694444444444444
+"23","1029","Moderately advanced disease",85,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,NA,NA,0.705882352941177,NA
+"24","1029","Moderately advanced disease",102,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,NA,0.696078431372549,NA,NA
+"25","1029","Moderately advanced disease",116,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,NA,0.732758620689655,NA,NA,NA
+"26","1029","Moderately advanced disease",138,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,NA,0.644927536231884,NA,NA,NA,NA
+"27","1029","Moderately advanced disease",164,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,NA,0.609756097560976,NA,NA,NA,NA,NA
+"28","1029","Moderately advanced disease",178,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,NA,0.623595505617977,NA,NA,NA,NA,NA,NA
+"29","1029","Moderately advanced disease",188,"Ailing, Ailing, Lincoln","1954, 1955",NA,NA,0.526595744680851,NA,NA,NA,NA,NA,NA,NA
+"30","1029","Moderately advanced disease",200,"Ailing, Ailing, Lincoln","1954, 1955",NA,0.415,NA,NA,NA,NA,NA,NA,NA,NA
+"31","1029","Moderately advanced disease",211,"Ailing, Ailing, Lincoln","1954, 1955",0.033175355450237,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"32","12","None",40,"National TB Inst.","1974",NA,0.275,NA,NA,NA,NA,NA,NA,NA,NA
+"33","12","None",70,"National TB Inst.","1974",NA,0.471428571428571,NA,NA,NA,NA,NA,NA,NA,NA
+"34","12","None",75,"National TB Inst.","1974",NA,NA,NA,NA,0.546666666666667,NA,NA,NA,NA,NA
+"35","12","None",88,"National TB Inst.","1974",NA,NA,0.5,NA,NA,NA,NA,NA,NA,NA
+"36","12","None",119,"National TB Inst.","1974",NA,0.243697478991597,NA,NA,NA,NA,NA,NA,NA,NA
+"37","12","None",126,"National TB Inst.","1974",NA,0.277777777777778,NA,NA,NA,NA,NA,NA,NA,NA
+"38","12","None",136,"National TB Inst.","1974",NA,0.389705882352941,NA,NA,NA,NA,NA,NA,NA,NA
+"39","12","None",154,"National TB Inst.","1974",NA,0.324675324675325,NA,NA,NA,NA,NA,NA,NA,NA
+"40","45","Far advanced disease",187,"Mitchell","1955",NA,NA,NA,NA,NA,NA,NA,NA,NA,0.727272727272727
+"41","45","Far advanced disease",192,"Mitchell","1955",NA,NA,NA,NA,NA,NA,NA,NA,0.692708333333333,NA
+"42","45","Far advanced disease",198,"Mitchell","1955",NA,NA,NA,NA,NA,NA,NA,0.661616161616162,NA,NA
+"43","45","Far advanced disease",205,"Mitchell","1955",NA,NA,NA,NA,NA,NA,0.629268292682927,NA,NA,NA
+"44","45","Far advanced disease",215,"Mitchell","1955",NA,NA,NA,NA,NA,0.613953488372093,NA,NA,NA,NA
+"45","45","Far advanced disease",228,"Mitchell","1955",NA,NA,NA,NA,0.548245614035088,NA,NA,NA,NA,NA
+"46","45","Far advanced disease",240,"Mitchell","1955",NA,NA,NA,0.429166666666667,NA,NA,NA,NA,NA,NA
+"47","45","Far advanced disease",259,"Mitchell","1955",NA,NA,0.281853281853282,NA,NA,NA,NA,NA,NA,NA
+"48","45","Far advanced disease",271,"Mitchell","1955",NA,0.107011070110701,NA,NA,NA,NA,NA,NA,NA,NA
+"49","45","Far advanced disease",298,"Mitchell","1955",0,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"50","45","Moderately advanced disease",972,"Mitchell","1955",NA,NA,NA,NA,NA,NA,NA,NA,NA,0.866255144032922
+"51","45","Moderately advanced disease",995,"Mitchell","1955",NA,NA,NA,NA,NA,NA,NA,NA,0.855276381909548,NA
+"52","45","Moderately advanced disease",1022,"Mitchell","1955",NA,NA,NA,NA,NA,NA,NA,0.825831702544031,NA,NA
+"53","45","Moderately advanced disease",1044,"Mitchell","1955",NA,NA,NA,NA,NA,NA,0.794061302681992,NA,NA,NA
+"54","45","Moderately advanced disease",1071,"Mitchell","1955",NA,NA,NA,NA,NA,0.759103641456583,NA,NA,NA,NA
+"55","45","Moderately advanced disease",1093,"Mitchell","1955",NA,NA,NA,NA,0.722781335773102,NA,NA,NA,NA,NA
+"56","45","Moderately advanced disease",1121,"Mitchell","1955",NA,NA,NA,0.665477252453167,NA,NA,NA,NA,NA,NA
+"57","45","Moderately advanced disease",1145,"Mitchell","1955",NA,NA,0.558078602620087,NA,NA,NA,NA,NA,NA,NA
+"58","45","Moderately advanced disease",1185,"Mitchell","1955",NA,0.353586497890295,NA,NA,NA,NA,NA,NA,NA,NA
+"59","45","Moderately advanced disease",1206,"Mitchell","1955",0,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"60","5_1047","None",879,"Bentley et al.","1954",NA,NA,NA,NA,NA,NA,0.86575654152446,NA,NA,NA
+"61","5_1047","None",899,"Bentley et al.","1954",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"62","65","None",571,"Springett","1971",NA,NA,NA,0.257443082311734,NA,NA,NA,NA,NA,NA
+"63","67","Far advanced disease",113.703703703704,"Stephens","1941",NA,NA,NA,NA,NA,NA,NA,NA,NA,0.334201954397394
+"64","67","Far advanced disease",135,"Stephens","1941",NA,NA,NA,NA,0.385185185185185,NA,NA,NA,NA,NA
+"65","67","Far advanced disease",192,"Stephens","1941",NA,NA,0.244791666666667,NA,NA,NA,NA,NA,NA,NA
+"66","67","Minimal disease",272.302100516881,"Stephens","1941",NA,NA,NA,NA,NA,NA,NA,NA,NA,0.506790067862311
+"67","67","Minimal disease",326.694610778443,"Stephens","1941",NA,NA,NA,NA,0.749935848088273,NA,NA,NA,NA,NA
+"68","67","Minimal disease",334,"Stephens","1941",NA,NA,0.802395209580838,NA,NA,NA,NA,NA,NA,NA
+"69","67","Moderately advanced disease",346.56793661497,"Stephens","1941",NA,NA,NA,NA,NA,NA,NA,NA,NA,0.438586447103643
+"70","67","Moderately advanced disease",414.46288209607,"Stephens","1941",NA,NA,NA,NA,0.571824426837492,NA,NA,NA,NA,NA
+"71","67","Moderately advanced disease",458,"Stephens","1941",NA,NA,0.495633187772926,NA,NA,NA,NA,NA,NA,NA
+"72","75_1019","None",1627,"Holst","1906",NA,NA,NA,NA,NA,NA,NA,NA,NA,0.110018438844499
+"73","75_1019","None",1658,"Holst","1906",NA,NA,NA,NA,NA,NA,NA,NA,0.130880579010856,NA
+"74","75_1019","None",1731,"Holst","1906",NA,NA,NA,NA,NA,NA,NA,0.16002310803004,NA,NA
+"75","75_1019","None",1804,"Holst","1906",NA,NA,NA,NA,NA,NA,0.184035476718404,NA,NA,NA
+"76","75_1019","None",1872,"Holst","1906",NA,NA,NA,NA,NA,0.206730769230769,NA,NA,NA,NA
+"77","75_1019","None",1949,"Holst","1906",NA,NA,NA,NA,0.23242688558235,NA,NA,NA,NA,NA
+"78","75_1019","None",2022,"Holst","1906",NA,NA,NA,0.234915924826904,NA,NA,NA,NA,NA,NA
+"79","75_1020","None",243,"Stadler","1903",NA,NA,NA,NA,NA,NA,NA,NA,0.135802469135802,NA
+"80","75_1020","None",277,"Stadler","1903",NA,NA,NA,NA,NA,NA,NA,0.205776173285199,NA,NA
+"81","75_1020","None",311,"Stadler","1903",NA,NA,NA,NA,NA,NA,0.254019292604502,NA,NA,NA
+"82","75_1020","None",357,"Stadler","1903",NA,NA,NA,NA,NA,0.319327731092437,NA,NA,NA,NA
+"83","75_1020","None",397,"Stadler","1903",NA,NA,NA,NA,0.360201511335013,NA,NA,NA,NA,NA
+"84","75_1020","None",448,"Stadler","1903",NA,NA,NA,0.397321428571429,NA,NA,NA,NA,NA,NA
+"85","75_1020","None",477,"Stadler","1903",NA,NA,0.415094339622642,NA,NA,NA,NA,NA,NA,NA
+"86","75_1020","None",541,"Stadler","1903",NA,0.465804066543438,NA,NA,NA,NA,NA,NA,NA,NA
+"87","75_1020","None",670,"Stadler","1903",0.550746268656716,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"88","79_1021","Negative",171,"Baart de la Faille","1939",NA,0.771929824561403,NA,NA,NA,NA,NA,NA,NA,NA
+"89","79_1021","Negative",479,"Baart de la Faille","1939",NA,0.780793319415449,NA,0.739039665970772,NA,NA,NA,NA,NA,NA
+"90","79_1021","Negative",849,"Baart de la Faille","1939",NA,0.730270906949352,NA,0.770318021201413,NA,0.730270906949352,NA,NA,NA,NA
+"91","79_1021","Negative",985,"Baart de la Faille","1939",NA,0.709644670050761,NA,0.709644670050761,NA,0.700507614213198,NA,0.719796954314721,NA,0.690355329949239
+"92","79_1021","Positive",247,"Baart de la Faille","1939",NA,0.558704453441296,NA,NA,NA,NA,NA,NA,NA,NA
+"93","79_1021","Positive",259,"Baart de la Faille","1939",NA,0.38996138996139,NA,0.401544401544402,NA,0.378378378378378,NA,NA,NA,NA
+"94","79_1021","Positive",280,"Baart de la Faille","1939",NA,0.360714285714286,NA,0.321428571428571,NA,0.310714285714286,NA,0.3,NA,0.289285714285714
+"95","79_1021","Positive",345,"Baart de la Faille","1939",NA,0.460869565217391,NA,0.460869565217391,NA,NA,NA,NA,NA,NA
+"96","79_1023","Far advanced disease",587,"Braeuning ","1936",NA,NA,NA,0.166950596252129,NA,NA,NA,NA,NA,NA
+"97","79_1023","Minimal disease",4,"Braeuning ","1936",NA,NA,NA,0.75,NA,NA,NA,NA,NA,NA
+"98","79_1023","Moderately advanced disease",155,"Braeuning ","1936",NA,NA,NA,0.406451612903226,NA,NA,NA,NA,NA,NA
+"99","79_1054","None",637,"Munchbach","1933",NA,NA,NA,NA,NA,NA,NA,NA,0.420722135007849,NA
+"100","79_1054","None",747,"Munchbach","1933",NA,NA,NA,NA,0.504685408299866,NA,NA,NA,NA,NA
+"101","79_1054","None",1150,"Munchbach","1933",NA,0.482608695652174,NA,NA,NA,NA,NA,NA,NA,NA
+"102","79_1054","None",1189,"Munchbach","1933",NA,NA,NA,NA,NA,NA,NA,0.455004205214466,NA,NA
+"103","79_1054","None",1195,"Munchbach","1933",NA,NA,NA,NA,NA,0.405020920502092,NA,NA,NA,NA
+"104","79_1054","None",1308,"Munchbach","1933",NA,NA,NA,NA,NA,NA,0.399847094801223,NA,NA,NA
+"105","79_1054","None",1309,"Munchbach","1933",NA,NA,0.486631016042781,NA,NA,NA,NA,NA,NA,NA
+"106","79_1054","None",1603,"Munchbach","1933",NA,NA,NA,0.510293200249532,NA,NA,NA,NA,NA,NA
+"107","91","None",158,"Wherrett","1935",NA,NA,NA,NA,NA,NA,NA,0.278481012658228,NA,NA
+"108","91","None",171,"Wherrett","1935",NA,NA,NA,NA,NA,NA,NA,NA,NA,0.257309941520468
+"109","91","None",183,"Wherrett","1935",NA,NA,NA,NA,NA,NA,NA,NA,0.295081967213115,NA
+"110","91","None",214,"Wherrett","1935",NA,NA,NA,NA,NA,NA,0.266355140186916,NA,NA,NA
+"111","91","None",232,"Wherrett","1935",NA,NA,NA,NA,0.310344827586207,NA,NA,NA,NA,NA
+"112","91","None",239,"Wherrett","1935",NA,NA,NA,NA,NA,0.330543933054393,NA,NA,NA,NA
+"113","91","None",266,"Wherrett","1935",NA,NA,NA,0.274436090225564,NA,NA,NA,NA,NA,NA
+"114","91","None",362,"Wherrett","1935",NA,NA,0.25414364640884,NA,NA,NA,NA,NA,NA,NA
+"115","94","None",1953,"Ferguson","1926",NA,NA,NA,NA,NA,NA,0.390168970814132,NA,NA,NA
