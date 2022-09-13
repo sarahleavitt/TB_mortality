@@ -212,7 +212,7 @@ getData <- function(data){
   #Finding n studies, severity groups, studys, individuals
   counts <- c("nStudies" = length(unique(data$study_id_num)),
               "nSeverity" = length(unique(data$study_sev)),
-              "nstudys" = length(unique(data$study_id)),
+              "nCohorts" = length(unique(data$cohort_id)),
               "nIndividuals" = nrow(data))
   
   return(list(tab, counts))
