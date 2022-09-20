@@ -174,6 +174,8 @@ eval_san <- output_time$eval
 save(data, res_time, eval_time, res_loc, eval_loc, res_san, eval_san,
      file = "R/bayesian_onestrata.RData")
 
+form_time <- formatBayesian(mortality, res_time, data, label = "Time", fixed = TRUE)
+
 png("Figures/xyplot_time.png")
 xyplot(eval_time)
 dev.off()

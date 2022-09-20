@@ -186,18 +186,16 @@ format_param <- function(res, label, fixed){
                                                     gsub("_comp\\[|\\]", "", value))),
                               label = label)
   }else{
-    param <- res[row.names(res) %in% c("meanlog_min", "meanlog_mod", "meanlog_adv",
-                                       "sdlog", "theta", "med_min", "med_mod", "med_adv",
-                                       "pred_min[1]", "pred_min[5]", "pred_min[10]",
-                                       "pred_mod[1]", "pred_mod[5]", "pred_mod[10]",
-                                       "pred_adv[1]", "pred_adv[5]", "pred_adv[10]"), ]
+    param <- res[row.names(res) %in% c("meanlog_strata0", "meanlog_strata1",
+                                       "sdlog", "theta", "med_strata0", "med_strata1",
+                                       "pred_strata0[1]", "pred_strata0[5]", "pred_strata0[10]",
+                                       "pred_strata1[1]", "pred_strata1[5]", "pred_strata1[10]"), ]
     names(param) <- c("cilb", "lowerquant", "est", "upperquant", "ciub")
     param <- param %>% mutate(label = label,
-                              severity = ifelse(grepl("min", row.names(.)), "Minimal",
-                                                ifelse(grepl("mod", row.names(.)), "Moderate",
-                                                       ifelse(grepl("adv", row.names(.)), "Advanced", NA))),
-                              value = gsub("_[a-z]*$|_[a-z]*\\[|\\]", "", row.names(.)),
-                              value = ifelse(value == "med", "median", value))
+                              value = gsub("_[a-z0-9]*$|_[a-z0-9]*\\[|\\]", "", row.names(.)),
+                              value = ifelse(value == "med", "median", value),
+                              strata = ifelse(grepl("strata0", row.names(.)), 0,
+                                              ifelse(grepl("strata1", row.names(.)), 1, NA)))
   }
   return(param)
 }
@@ -230,12 +228,12 @@ format_surv_dens <- function(param, res, label, fixed){
     sdlog <- param %>% filter(value == "sdlog") %>% pull(est)
     surv_dens <- NULL
     x <- seq(0, 30, 0.1)
-    for(sev in c("Minimal", "Moderate", "Advanced")){
-      meanlog <- param %>% filter(severity == sev, value == "meanlog") %>% pull(est)
+    for(s in 0:1){
+      meanlog <- param %>% filter(strata == s, value == "meanlog") %>% pull(est)
       
       dens <- dlnorm(x, meanlog, sdlog)
       surv <- plnorm(x, meanlog, sdlog, lower.tail = FALSE)
-      densTemp <- cbind.data.frame(x, "severity" = sev, meanlog, sdlog, dens, surv)
+      densTemp <- cbind.data.frame(x, "strata" = s, meanlog, sdlog, dens, surv)
       
       surv_dens <- bind_rows(surv_dens, densTemp)
     }
@@ -243,20 +241,17 @@ format_surv_dens <- function(param, res, label, fixed){
     #Credible bounds for survival curves
     credint <- res[grepl("pred_[a-z]*", row.names(res)), ]
     credint <- credint %>%
-      mutate(x = as.numeric(str_extract(row.names(.), "[0-9]+")),
-             severity = ifelse(grepl("min", row.names(.)), "Minimal",
-                               ifelse(grepl("mod", row.names(.)), "Moderate",
-                                      ifelse(grepl("adv", row.names(.)), "Advanced", NA)))) %>%
-      select(x, severity, surv_est = `50%`, cilb = `2.5%`, ciub = `97.5%`) %>%
-      bind_rows(cbind.data.frame(x = 0, severity = "Minimal", surv_est = 1, cilb = 1, ciub = 1),
-                cbind.data.frame(x = 0, severity = "Moderate", surv_est = 1, cilb = 1, ciub = 1),
-                cbind.data.frame(x = 0, severity = "Advanced", surv_est = 1, cilb = 1, ciub = 1))
+      mutate(x = as.numeric(gsub("\\[|\\]", "",
+                                 str_extract(row.names(.), "\\[[0-9]+\\]"))),
+             strata = ifelse(grepl("strata0", row.names(.)), 0,
+                               ifelse(grepl("strata1", row.names(.)), 1, NA))) %>%
+      select(x, strata, surv_est = `50%`, cilb = `2.5%`, ciub = `97.5%`) %>%
+      bind_rows(cbind.data.frame(x = 0, strata = 0, surv_est = 1, cilb = 1, ciub = 1),
+                cbind.data.frame(x = 0, strata = 0, surv_est = 1, cilb = 1, ciub = 1))
     
     surv_dens <- surv_dens %>% 
       mutate(label = label) %>%
-      full_join(credint, by = c("x", "severity")) %>%
-      mutate(severity = factor(severity, levels = c("Minimal", "Moderate", "Advanced", "Unknown"),
-                               labels = c("Minimal", "Moderately advanced", "Far advanced", "Unknown")))
+      full_join(credint, by = c("x", "strata"))
   }
   
   return(surv_dens)
@@ -337,24 +332,18 @@ format_pred_comb <- function(ind_est, param, label, fixed){
   pred_comb <- ind_est %>% 
     filter(value == "median" | grepl("pred", value)) %>%
     bind_rows(param %>% filter(value == "med" | grepl("pred", value))) %>%
-    mutate(shape = ifelse(is.na(study_id), "Overall", "Individual"))
+    mutate(shape = ifelse(is.na(study_id), "Overall", "Individual")) %>%
+    select(-label)
   
   if(fixed == FALSE){
     pred_comb <- pred_comb %>%
-      replace_na(list(severity = "",
-                      study_id = "Overall",
+      replace_na(list(study_id = "Overall",
                       first_author = "Overall"))
   }else{
     pred_comb <- pred_comb %>%
-      mutate(study_sev = ifelse(is.na(study_sev), paste("Overall", severity, sep = "_"),
-                                study_sev),
-             first_author = ifelse(is.na(first_author), "Overall", first_author),
-             severity = ifelse(grepl("Overall", study_sev) & severity == "Minimal", "",
-                               ifelse(grepl("Overall", study_sev) & severity == "Moderate", " ",
-                                      ifelse(grepl("Overall", study_sev) & severity == "Advanced", "  ",
-                                             severity))),
-             severity = factor(severity, levels = c("Minimal", "", "Moderate", " ", "Advanced", "  "),
-                               labels = c("Minimal", "", "Moderately\nadvanced", " ", "Far\nadvanced", "  ")))
+      mutate(study_id = ifelse(is.na(study_id), paste("Overall", strata, sep = "_"),
+                               study_id),
+             first_author = ifelse(is.na(first_author), "Overall", first_author))
     
   }
   
