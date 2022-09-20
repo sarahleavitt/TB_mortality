@@ -154,6 +154,23 @@ cohortToIndCure <- function(DFc, timepoints = c(3, 4, 5, 10)){
 }
 
 
+## Function to get information about the dataset for each run
+getData <- function(data){
+  
+  #Finding concordance to frailty IDs
+  tab <- data %>%
+    select(study_id, study_id_num) %>%
+    filter(!duplicated(study_id))
+  
+  #Finding n studies, severity groups, cohorts, individuals
+  counts <- c("nStudies" = length(unique(data$study_id_num)),
+              "nCohorts" = length(unique(data$cohort_id)),
+              "nIndividuals" = nrow(data))
+  
+  return(list(tab, counts))
+}
+
+
 ## Function to format the parameter table from the Bayesian analysis
 format_param <- function(res, label, fixed){
   
@@ -165,7 +182,8 @@ format_param <- function(res, label, fixed){
     names(param) <- c("cilb", "lowerquant", "est", "upperquant", "ciub")
     param <- param %>% mutate(value = row.names(param),
                               value = ifelse(value == "mu", "meanlog",
-                                             ifelse(value == "med_comp", "median", gsub("_comp\\[|\\]", "", value))),
+                                             ifelse(value == "med_comp", "median",
+                                                    gsub("_comp\\[|\\]", "", value))),
                               label = label)
   }else{
     param <- res[row.names(res) %in% c("meanlog_min", "meanlog_mod", "meanlog_adv",
@@ -250,14 +268,14 @@ format_ind_est <- function(covar, res, data, fixed){
   #Individual study median
   med_ind <- as.data.frame(res[grepl("med_ind", row.names(res)),])
   med_ind <- med_ind %>%
-    mutate(study_sev_num = as.numeric(gsub("med_ind\\[|\\]", "", row.names(med_ind))),
+    mutate(study_id_num = as.numeric(gsub("med_ind\\[|\\]", "", row.names(med_ind))),
            value = "median")
   
   #Individual study predictions
   pred_ind <- as.data.frame(res[grepl("pred[0-9]*\\[", row.names(res)),])
   pred_ind <- pred_ind %>%
     mutate(rown = row.names(.),
-           study_sev_num = as.numeric(gsub("pred[0-9]*\\[|\\]", "", rown)),
+           study_id_num = as.numeric(gsub("pred[0-9]*\\[|\\]", "", rown)),
            value = str_extract(rown, "pred[0-9]*")) %>%
     select(-rown)
   
@@ -265,22 +283,23 @@ format_ind_est <- function(covar, res, data, fixed){
   if(fixed == FALSE){
     mean_ind <- as.data.frame(res[grepl("meanlog", row.names(res)),])
     mean_ind <- mean_ind %>%
-      mutate(study_sev_num = as.numeric(gsub("meanlog\\[|\\]", "", row.names(mean_ind))),
+      mutate(study_id_num = as.numeric(gsub("meanlog\\[|\\]", "", row.names(mean_ind))),
              value = "meanlog")
   }else{
     mean_ind <- as.data.frame(res[grepl("meanlog_ind", row.names(res)),])
     mean_ind <- mean_ind %>%
-      mutate(study_sev_num = as.numeric(gsub("meanlog_ind\\[|\\]", "", row.names(mean_ind))),
+      mutate(study_id_num = as.numeric(gsub("meanlog_ind\\[|\\]", "", row.names(mean_ind))),
              value = "meanlog")
   }
   
   #Combining the above
   ind_est <- bind_rows(med_ind, mean_ind, pred_ind)
-  names(ind_est) <- c("cilb", "lowerquant", "est", "upperquant", "ciub", "study_sev_num", "value")
+  names(ind_est) <- c("cilb", "lowerquant", "est", "upperquant", "ciub",
+                      "study_id_num", "value")
   ind_est <- ind_est %>%
-    full_join(data[[1]], by = "study_sev_num") %>%
-    left_join(covar, by = "study_sev") %>%
-    select(-study_sev_num, -study_id_num)
+    full_join(data[[1]], by = "study_id_num") %>%
+    left_join(covar, by = "study_id") %>%
+    select(-study_id_num)
   
   return(ind_est)
 }
@@ -299,16 +318,14 @@ format_ind_surv <- function(ind_est, covar, param, label){
     
     dens <- dlnorm(x, row$est, sdlog)
     surv <- plnorm(x, row$est, sdlog, lower.tail = FALSE)
-    densTemp <- cbind.data.frame(x, "study_sev" = row$study_sev, "meanlog" = row$est,
+    densTemp <- cbind.data.frame(x, "study_id" = row$study_id, "meanlog" = row$est,
                                  sdlog, dens, surv)
     
     ind_surv <- bind_rows(ind_surv, densTemp)
   }
   ind_surv <- ind_surv %>%
-    left_join(covar, by = "study_sev") %>%
-    mutate(label = label,
-           severity = factor(severity, levels = c("Minimal", "Moderate", "Advanced", "Unknown"),
-                             labels = c("Minimal", "Moderately advanced", "Far advanced", "Unknown")))
+    left_join(covar, by = "study_id") %>%
+    mutate(label = label)
   
   return(ind_surv)
 }
@@ -320,16 +337,13 @@ format_pred_comb <- function(ind_est, param, label, fixed){
   pred_comb <- ind_est %>% 
     filter(value == "median" | grepl("pred", value)) %>%
     bind_rows(param %>% filter(value == "med" | grepl("pred", value))) %>%
-    mutate(shape = ifelse(is.na(study_sev), "Overall", "Individual"))
+    mutate(shape = ifelse(is.na(study_id), "Overall", "Individual"))
   
   if(fixed == FALSE){
     pred_comb <- pred_comb %>%
       replace_na(list(severity = "",
-                      study_sev = "Overall",
-                      first_author = "Overall")) %>%
-      mutate(severity = factor(severity, levels = c("Minimal", "Moderate", "Advanced", "Unknown", ""),
-                               labels = c("Minimal", "Moderately\nadvanced", "Far\nadvanced",
-                                          "Unknown", "")))
+                      study_id = "Overall",
+                      first_author = "Overall"))
   }else{
     pred_comb <- pred_comb %>%
       mutate(study_sev = ifelse(is.na(study_sev), paste("Overall", severity, sep = "_"),
@@ -365,12 +379,11 @@ formatBayesian <- function(mortalityData, res, data, label, fixed = FALSE){
   #Creating table of covariate data
   covar <- mortalityData %>%
     #full_join(studyid, by = "study_id") %>%
-    group_by(study_sev) %>%
+    group_by(study_id) %>%
     summarize(first_author = first(first_author),
               sanatorium = first(sanatorium),
               location = first(location),
               time_period = first(time_period),
-              severity = first(severity),
               start_type = first(start_type),
               .groups = "drop")
   

@@ -11,7 +11,7 @@
 
 #### MCMC Model Functions --------------------------------------------------------------------------
 
-#### Complete model (no fixed effect for severity) ####
+#### Complete model (no fixed effects for strata) ####
 
 m_comp <- function(){
   
@@ -61,9 +61,9 @@ par_comp <- c("mu", "theta", "sdlog", "med_comp", "meanlog", "med_ind",
               "pred_comp", "pred1", "pred5", "pred10")
 
 
-#### Stratified model (fixed effect for severity) ####
+#### Fixed effect for strata separately ####
 
-m_sev <- function(){
+m_one_strata <- function(){
   
   #Frailty for each study
   for(j in 1:n_frail){
@@ -72,7 +72,7 @@ m_sev <- function(){
   
   for(i in 1:N){
     #Meanlog of lognormal distribution for each individual
-    meanlog[i] <- ui[frail[i]] + bmod*sev_mod[i] + badv*sev_adv[i]
+    meanlog[i] <- ui[frail[i]] + bstrata*strata[i]
     #Setting up the survival model
     interval[i] ~ dinterval(time[i], lim[i, ])
     time[i] ~ dlnorm(meanlog[i], taulog)
@@ -80,8 +80,7 @@ m_sev <- function(){
   
   #Priors
   alpha ~ dnorm(0, 0.0001)
-  bmod ~ dnorm(0, 0.0001)
-  badv ~ dnorm(0, 0.0001)
+  bstrata ~ dnorm(0, 0.0001)
   taulog ~ dgamma(1, 1)
   tau ~ dgamma(1, 1)
   
@@ -90,23 +89,20 @@ m_sev <- function(){
   #sdlog of all survival densities (study-specific and overall)
   sdlog <- sqrt(1/taulog)
   #Overall median survival for each severity
-  meanlog_min <- alpha
-  meanlog_mod <- alpha + bmod
-  meanlog_adv <- alpha + badv
-  med_min <- exp(alpha)
-  med_mod <- exp(alpha + bmod)
-  med_adv <- exp(alpha + badv)
+  meanlog_strata0 <- alpha
+  meanlog_strata1 <- alpha + bstrata
+  med_strata0 <- exp(alpha)
+  med_strata1 <- exp(alpha + bstrata)
   
   #Prediction for confidence bands
   for(t in 1:30){
-    pred_min[t] <- 1 - plnorm(t, meanlog_min, taulog)
-    pred_mod[t] <- 1 - plnorm(t, meanlog_mod, taulog)
-    pred_adv[t] <- 1 - plnorm(t, meanlog_adv, taulog)
+    pred_strata0[t] <- 1 - plnorm(t, meanlog_strata0, taulog)
+    pred_strata1[t] <- 1 - plnorm(t, meanlog_strata1, taulog)
   }
   
   #study-specific meanlog of the lognormal density and median survival
-  for(k in 1:n_study_sev){
-    meanlog_ind[k] <- ui[frail2[k]] + bmod*study_sev_mod[k] + badv*study_sev_adv[k]
+  for(k in 1:n_study){
+    meanlog_ind[k] <- ui[frail2[k]] + bstrata*study_strata[k]
     med_ind[k] <- exp(meanlog_ind[k])
     
     #Prediction of 1/5/10 year survival
@@ -117,10 +113,58 @@ m_sev <- function(){
 }
 
 #Parameters to track
-par_sev <- c("theta", "sdlog", "alpha", "bmod", "badv",
-             "meanlog_ind", "meanlog_min", "meanlog_mod", "meanlog_adv",
-             "med_ind", "med_min", "med_mod", "med_adv",
-             "pred1", "pred5", "pred10", "pred_min", "pred_mod", "pred_adv")
+par_one_strata <- c("theta", "sdlog", "alpha", "bstrata",
+                    "meanlog_ind", "meanlog_strata0", "meanlog_strata1",
+                    "med_ind", "med_strata0", "med_strata1",
+                    "pred1", "pred5", "pred10", "pred_strata0", "pred_strata1")
+
+
+
+#### Fixed effect for strata combined ####
+
+m_all_strata <- function(){
+  
+  #Frailty for each study
+  for(j in 1:n_frail){
+    ui[j] ~ dnorm(alpha, tau)
+  }
+  
+  for(i in 1:N){
+    #Meanlog of lognormal distribution for each individual
+    meanlog[i] <- ui[frail[i]] + btimep*timep[i] + bloc*loc[i] + bsan*san[i]
+    #Setting up the survival model
+    interval[i] ~ dinterval(time[i], lim[i, ])
+    time[i] ~ dlnorm(meanlog[i], taulog)
+  }
+  
+  #Priors
+  alpha ~ dnorm(0, 0.0001)
+  btimep ~ dnorm(0, 0.0001)
+  bloc ~ dnorm(0, 0.0001)
+  bsan ~ dnorm(0, 0.0001)
+  taulog ~ dgamma(1, 1)
+  tau ~ dgamma(1, 1)
+  
+  #Variance of the frailty distribution
+  theta <- 1/tau
+  #sdlog of all survival densities (study-specific and overall)
+  sdlog <- sqrt(1/taulog)
+  
+  #study-specific meanlog of the lognormal density and median survival
+  for(k in 1:n_study){
+    meanlog_ind[k] <- ui[frail2[k]] + btimep*study_timep[k] + bloc*study_loc[k] + bsan*study_san[k]
+    med_ind[k] <- exp(meanlog_ind[k])
+    
+    #Prediction of 1/5/10 year survival
+    pred1[k] <- 1 - plnorm(1, meanlog_ind[k], taulog)
+    pred5[k] <- 1 - plnorm(5, meanlog_ind[k], taulog)
+    pred10[k] <- 1 - plnorm(10, meanlog_ind[k], taulog)
+  }
+}
+
+#Parameters to track
+par_all_strata <- c("theta", "sdlog", "alpha", "btimep", "bloc", "bsan",
+                    "meanlog_ind", "med_ind","pred1", "pred5", "pred10")
 
 
 
@@ -128,7 +172,7 @@ par_sev <- c("theta", "sdlog", "alpha", "bmod", "badv",
 #### Functions to Run the Models -------------------------------------------------------------------
 
 
-#### Complete model (no fixed effect for severity) ####
+#### Complete model (no fixed effects for strata) ####
 
 run_comp <- function(df, n.iter = 31000, n.burnin = 1000, n.thin = 30){
   
@@ -137,8 +181,8 @@ run_comp <- function(df, n.iter = 31000, n.burnin = 1000, n.thin = 30){
              interval = df$interval,
              lim = cbind(df$x1, df$x2),
              time = rep(NA, nrow(df)),
-             n_frail = length(unique(df$study_sev_num)),
-             frail = df$study_sev_num
+             n_frail = length(unique(df$study_id_num)),
+             frail = df$study_id_num
   )
   
   #Fitting the model
@@ -156,17 +200,12 @@ run_comp <- function(df, n.iter = 31000, n.burnin = 1000, n.thin = 30){
 }
 
 
-#### Stratified model (fixed effect for severity) ####
+#### Fixed effect for strata separately ####
 
-run_sev <- function(df, n.iter = 61000, n.burnin = 1000, n.thin = 30){
+run_one_strata <- function(df, study_data, strata_var, n.iter = 61000,
+                           n.burnin = 1000, n.thin = 30){
   
-  #Getting information for each study
-  study_data <- df %>%
-    group_by(study_sev_num) %>%
-    summarize(study_id_num = first(study_id_num),
-              sev_mod = first(sev_mod),
-              sev_adv = first(sev_adv),
-              sev_unk = first(sev_unk))
+  study_data <- as.data.frame(study_data)
   
   #Creating MCMC dataset
   dt <- list(N = nrow(df),
@@ -175,23 +214,58 @@ run_sev <- function(df, n.iter = 61000, n.burnin = 1000, n.thin = 30){
              time = rep(NA, nrow(df)),
              n_frail = length(unique(df$study_id_num)),
              frail = df$study_id_num,
-             sev_mod = df$sev_mod,
-             sev_adv = df$sev_adv,
-             n_study_sev = nrow(study_data),
+             strata = df[, strata_var],
+             n_study = nrow(study_data),
              frail2 = study_data$study_id_num,
-             study_sev_mod = study_data$sev_mod,
-             study_sev_adv = study_data$sev_adv
+             study_strata = study_data[, strata_var]
   )
   
   #Fitting model
-  fit <- jags(data = dt, model.file = m_sev,
-              parameters.to.save = par_sev,
+  fit <- jags(data = dt, model.file = m_one_strata,
+              parameters.to.save = par_one_strata,
               n.iter = n.iter, n.burnin = n.burnin,
               n.chains = 1, n.thin = n.thin)
   
   #Extracting results
   mcmc <- as.mcmc(fit)
-  eval <- mcmc[, c("alpha", "bmod", "badv", "theta", "sdlog")]
+  eval <- mcmc[, c("alpha", "bstrata", "theta", "sdlog")]
+  res <- as.data.frame(summary(mcmc)$quantiles)
+  
+  return(list("res" = res, "eval" = eval))
+}
+
+
+#### Fixed effect for strata combined ####
+
+run_all_strata <- function(df, study_data, n.iter = 61000, n.burnin = 1000,
+                           n.thin = 30){
+  
+  #Creating MCMC dataset
+  dt <- list(N = nrow(df),
+             interval = df$interval,
+             lim = cbind(df$x1, df$x2),
+             time = rep(NA, nrow(df)),
+             n_frail = length(unique(df$study_id_num)),
+             frail = df$study_id_num,
+             timep = df$pre1930,
+             loc = df$northamerica,
+             san = df$sanatorium,
+             n_study = nrow(study_data),
+             frail2 = study_data$study_id_num,
+             study_timep = study_data$pre1930,
+             study_loc = study_data$northamerica,
+             study_san = study_data$sanatorium
+  )
+  
+  #Fitting model
+  fit <- jags(data = dt, model.file = m_all_strata,
+              parameters.to.save = par_all_strata,
+              n.iter = n.iter, n.burnin = n.burnin,
+              n.chains = 1, n.thin = n.thin)
+  
+  #Extracting results
+  mcmc <- as.mcmc(fit)
+  eval <- mcmc[, c("alpha", "btimep", "bloc", "bsan", "theta", "sdlog")]
   res <- as.data.frame(summary(mcmc)$quantiles)
   
   return(list("res" = res, "eval" = eval))
@@ -206,15 +280,13 @@ getData <- function(data){
   
   #Finding concordance to frailty IDs
   tab <- data %>%
-    select(study_id, study_id_num, study_sev, study_sev_num) %>%
-    filter(!duplicated(study_sev))
+    select(study_id, study_id_num) %>%
+    filter(!duplicated(study_id))
   
-  #Finding n studies, severity groups, studys, individuals
+  #Finding n studies, severity groups, cohorts, individuals
   counts <- c("nStudies" = length(unique(data$study_id_num)),
-              "nSeverity" = length(unique(data$study_sev)),
               "nCohorts" = length(unique(data$cohort_id)),
               "nIndividuals" = nrow(data))
   
   return(list(tab, counts))
 }
-

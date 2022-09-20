@@ -32,61 +32,65 @@ mortality <- mortality %>%
          x1 = interval_l,
          x2 = ifelse(death_tb == 0, 10000, interval_r))
 
-n.iter <- 31000
-n.burnin <- 1000
-n.thin <- 30
+# n.iter <- 31000
+# n.burnin <- 1000
+# n.thin <- 30
 
-# n.iter <- 100
-# n.burnin <- 10
-# n.thin <- 1
+n.iter <- 100
+n.burnin <- 10
+n.thin <- 1
 
+
+#Subsetting and formatting data
+mortality_strata <- mortality %>%
+  #Removing severity stratified mortality data for study 79_1023 (only 4-year follow-up)
+  filter(!cohort_id %in% c("79_1023_5", "79_1023_6", "79_1023_7")) %>%
+  mutate(study_id_num = as.numeric(factor(study_id)),
+         pre1930 = as.numeric(time_period == "pre-1930"),
+         northamerica = as.numeric(location == "North America"),
+         sanatorium = as.numeric(sanatorium == "Yes"))
+
+#Getting information for each study
+study_data <- mortality_strata %>%
+  group_by(study_id_num) %>%
+  summarize(pre1930 = first(pre1930),
+            northamerica = first(northamerica),
+            sanatorium = first(sanatorium))
 
 
 #### Running Models --------------------------------------------------------------------------------
 
+# Complete Model ####
 
-#### All Studies: Complete Model ####
-
-#Subsetting and formatting data
-mortality_comp_all <- mortality %>%
-  #Removing severity stratified mortality data for study 79_1023 (only 4-year follow-up)
-  filter(!cohort_id %in% c("79_1023_5", "79_1023_6", "79_1023_7")) %>%
-  mutate(study_sev_num = as.numeric(factor(study_sev)),
-         study_id_num = as.numeric(factor(study_id)))
-
-#Running model
-output_comp_all <- run_comp(mortality_comp_all,
-                            n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+output_comp <- run_comp(mortality_strata, n.iter = n.iter, n.burnin = n.burnin,
+                        n.thin = n.thin)
 
 
+#### Fixed effect for strata separately ####
 
-#### All Studies: Stratified Model ####
+output_time <- run_one_strata(mortality_strata, study_data, "pre1930",
+                              n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 
-#Subsetting and formatting data
-mortality_sev_all <- mortality %>%
-  filter(severity != "Unknown") %>%
-  mutate(study_sev_num = as.numeric(factor(study_sev)),
-         study_id_num = as.numeric(factor(study_id)),
-         sev_mod = as.numeric(severity == "Moderate"),
-         sev_adv = as.numeric(severity == "Advanced"),
-         sev_unk = as.numeric(severity == "Unknown"))
+output_loc <- run_one_strata(mortality_strata, study_data, "northamerica",
+                              n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 
-#Running model
-output_sev_all <- run_sev(mortality_sev_all,
-                          n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+output_san <- run_one_strata(mortality_strata, study_data, "sanatorium",
+                              n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 
 
+#### Fixed effect for strata combined ####
+
+output_all <- run_all_strata(mortality_strata, study_data, n.iter = n.iter,
+                             n.burnin = n.burnin, n.thin = n.thin)
 
 
 
 #### Saving Results------------------------------------------------------------------------------
 
-data_comp_all <- getData(mortality_comp_all)
-data_sev_all <- getData(mortality_sev_all)
-res_comp_all <- output_comp_all$res
-res_sev_all <- output_sev_all$res
-eval_comp_all <- output_comp_all$eval
-eval_sev_all <- output_sev_all$eval
+data_comp <- getData(mortality_comp)
+res_comp <- output_comp$res
+eval_comp <- output_comp$eval
+
 
 save(res_comp_all, res_sev_all, eval_comp_all, eval_sev_all, data_comp_all, data_sev_all,
      file = "R/bayesian_all.RData")
