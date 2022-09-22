@@ -52,6 +52,8 @@ m_one_strata <- function(){
   meanlog_strata1 <- alpha + bstrata
   med_strata0 <- exp(alpha)
   med_strata1 <- exp(alpha + bstrata)
+  #Difference in median survival between strata values
+  med_diff <- exp(bstrata)
   
   #Prediction for confidence bands
   for(t in 1:30){
@@ -74,7 +76,7 @@ m_one_strata <- function(){
 #Parameters to track
 par_one_strata <- c("theta", "sdlog", "alpha", "bstrata",
                     "meanlog_ind", "meanlog_strata0", "meanlog_strata1",
-                    "med_ind", "med_strata0", "med_strata1",
+                    "med_ind", "med_strata0", "med_strata1", "med_diff",
                     "pred1", "pred5", "pred10", "pred_strata0", "pred_strata1")
 
 
@@ -166,10 +168,10 @@ output_san <- run_one_strata(mortality_strata, study_data, "sanatorium",
 data <- getData(mortality_strata)
 res_time <- output_time$res
 eval_time <- output_time$eval
-res_loc <- output_time$res
-eval_loc <- output_time$eval
-res_san <- output_time$res
-eval_san <- output_time$eval
+res_loc <- output_loc$res
+eval_loc <- output_loc$eval
+res_san <- output_san$res
+eval_san <- output_san$eval
 
 form_time <- formatBayesian(mortality, res_time, data, label = "Time", fixed = TRUE)
 form_loc <- formatBayesian(mortality, res_loc, data, label = "Location", fixed = TRUE)

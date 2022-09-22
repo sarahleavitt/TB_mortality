@@ -149,6 +149,10 @@ m_all_strata <- function(){
   theta <- 1/tau
   #sdlog of all survival densities (study-specific and overall)
   sdlog <- sqrt(1/taulog)
+  #Overall median survival for one unit change in strata value
+  med_timep <- exp(alpha + btimep)
+  med_loc <- exp(alpha + bloc)
+  med_san <- exp(alpha + bsan)
   
   #study-specific meanlog of the lognormal density and median survival
   for(k in 1:n_study){
@@ -164,6 +168,7 @@ m_all_strata <- function(){
 
 #Parameters to track
 par_all_strata <- c("theta", "sdlog", "alpha", "btimep", "bloc", "bsan",
+                    "med_timep", "med_loc", "med_san",
                     "meanlog_ind", "med_ind","pred1", "pred5", "pred10")
 
 

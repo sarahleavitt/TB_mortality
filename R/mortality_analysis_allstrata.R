@@ -50,9 +50,9 @@ m_all_strata <- function(){
   #sdlog of all survival densities (study-specific and overall)
   sdlog <- sqrt(1/taulog)
   #Overall median survival for one unit change in strata value
-  med_timep <- exp(alpha + btimep)
-  med_loc <- exp(alpha + bloc)
-  med_san <- exp(alpha + bsan)
+  med_timep <- exp(btimep)
+  med_loc <- exp(bloc)
+  med_san <- exp(bsan)
   
   #study-specific meanlog of the lognormal density and median survival
   for(k in 1:n_study){
@@ -121,13 +121,13 @@ mortality <- mortality %>%
          x1 = interval_l,
          x2 = ifelse(death_tb == 0, 10000, interval_r))
 
-# n.iter <- 31000
-# n.burnin <- 1000
-# n.thin <- 30
+n.iter <- 31000
+n.burnin <- 1000
+n.thin <- 30
 
-n.iter <- 100
-n.burnin <- 10
-n.thin <- 1
+# n.iter <- 100
+# n.burnin <- 10
+# n.thin <- 1
 
 
 #Subsetting and formatting data
@@ -156,7 +156,18 @@ data <- getData(mortality_strata)
 res_all <- output_all$res
 eval_all <- output_all$eval
 
-save(data, res_all, eval_all, file = "R/bayesian_allstrata.RData")
+#Formatting data
+form_all <- res_all[row.names(res_all) %in% c("sdlog", "theta", "med_timep",
+                                           "med_loc", "med_san"), ]
+names(form_all) <- c("cilb", "lowerquant", "est", "upperquant", "ciub")
+form_all <- form_all %>%
+  mutate(label = "All Strata",
+         value = ifelse(grepl("med", row.names(.)), "median", row.names(.)),
+         strata = ifelse(grepl("time", row.names(.)), "time",
+                         ifelse(grepl("loc", row.names(.)), "location",
+                                ifelse(grepl("san", row.names(.)), "sanatorium", NA))))
+
+save(form_all, file = "R/bayesian_allstrata.RData")
 
 png("Figures/xyplot_all.png")
 xyplot(eval_all)

@@ -187,15 +187,15 @@ format_param <- function(res, label, fixed){
                               label = label)
   }else{
     param <- res[row.names(res) %in% c("meanlog_strata0", "meanlog_strata1",
-                                       "sdlog", "theta", "med_strata0", "med_strata1",
+                                       "sdlog", "theta", "med_strata0", "med_strata1", "med_diff",
                                        "pred_strata0[1]", "pred_strata0[5]", "pred_strata0[10]",
                                        "pred_strata1[1]", "pred_strata1[5]", "pred_strata1[10]"), ]
     names(param) <- c("cilb", "lowerquant", "est", "upperquant", "ciub")
     param <- param %>% mutate(label = label,
                               value = gsub("_[a-z0-9]*$|_[a-z0-9]*\\[|\\]", "", row.names(.)),
                               value = ifelse(value == "med", "median", value),
-                              strata = ifelse(grepl("strata0", row.names(.)), 0,
-                                              ifelse(grepl("strata1", row.names(.)), 1, NA)))
+                              strata = ifelse(grepl("strata0", row.names(.)), "ref",
+                                              ifelse(grepl("strata1", row.names(.)), "other", NA)))
   }
   return(param)
 }
@@ -228,7 +228,7 @@ format_surv_dens <- function(param, res, label, fixed){
     sdlog <- param %>% filter(value == "sdlog") %>% pull(est)
     surv_dens <- NULL
     x <- seq(0, 30, 0.1)
-    for(s in 0:1){
+    for(s in c("ref", "other")){
       meanlog <- param %>% filter(strata == s, value == "meanlog") %>% pull(est)
       
       dens <- dlnorm(x, meanlog, sdlog)
@@ -243,11 +243,11 @@ format_surv_dens <- function(param, res, label, fixed){
     credint <- credint %>%
       mutate(x = as.numeric(gsub("\\[|\\]", "",
                                  str_extract(row.names(.), "\\[[0-9]+\\]"))),
-             strata = ifelse(grepl("strata0", row.names(.)), 0,
-                               ifelse(grepl("strata1", row.names(.)), 1, NA))) %>%
+             strata = ifelse(grepl("strata0", row.names(.)), "ref",
+                               ifelse(grepl("strata1", row.names(.)), "other", NA))) %>%
       select(x, strata, surv_est = `50%`, cilb = `2.5%`, ciub = `97.5%`) %>%
-      bind_rows(cbind.data.frame(x = 0, strata = 0, surv_est = 1, cilb = 1, ciub = 1),
-                cbind.data.frame(x = 0, strata = 0, surv_est = 1, cilb = 1, ciub = 1))
+      bind_rows(cbind.data.frame(x = 0, strata = "ref", surv_est = 1, cilb = 1, ciub = 1),
+                cbind.data.frame(x = 0, strata = "other", surv_est = 1, cilb = 1, ciub = 1))
     
     surv_dens <- surv_dens %>% 
       mutate(label = label) %>%

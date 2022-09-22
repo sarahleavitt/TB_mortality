@@ -151,7 +151,7 @@ output_europe <- run_comp(europe, n.iter = n.iter, n.burnin = n.burnin, n.thin =
 
 
 #Sanatorium stratification
-san <- mortality_strata %>%
+yessan <- mortality_strata %>%
   filter(sanatorium == "Yes") %>%
   mutate(study_id_num = as.numeric(factor(study_id)))
 
@@ -159,7 +159,7 @@ nosan <- mortality_strata %>%
   filter(sanatorium == "No") %>%
   mutate(study_id_num = as.numeric(factor(study_id)))
 
-output_san <- run_comp(san, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+output_yessan <- run_comp(yessan, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 output_nosan <- run_comp(nosan, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 
 
@@ -179,9 +179,9 @@ data_europe <- getData(europe)
 res_europe <- output_europe$res
 eval_europe <- output_europe$eval
 
-data_san <- getData(san)
-res_san <- output_san$res
-eval_san <- output_san$eval
+data_yessan <- getData(yessan)
+res_yessan <- output_yessan$res
+eval_yessan <- output_yessan$eval
 data_nosan <- getData(nosan)
 res_nosan <- output_nosan$res
 eval_nosan <- output_nosan$eval
@@ -190,10 +190,10 @@ form_pre <- formatBayesian(mortality, res_pre, data_pre, "Pre-1930s")
 form_post <- formatBayesian(mortality, res_post, data_post, "Post-1930s")
 form_namerica <- formatBayesian(mortality, res_namerica, data_namerica, "North America")
 form_europe <- formatBayesian(mortality, res_europe, data_europe, "Europe")
-form_san <- formatBayesian(mortality, res_san, data_san, "Sanatorium/hospital")
+form_yessan <- formatBayesian(mortality, res_yessan, data_yessan, "Sanatorium/hospital")
 form_nosan <- formatBayesian(mortality, res_post, data_nosan, "Not Sanatorium")
 
-save(form_pre, form_post, form_namerica, form_europe, form_san, form_nosan,
+save(form_pre, form_post, form_namerica, form_europe, form_yessan, form_nosan,
      file = "R/bayesian_separate.RData")
 
 png("Figures/xyplot_pre.png")
@@ -224,11 +224,11 @@ png("Figures/autocorr_europe.png")
 autocorr.plot(eval_europe)
 dev.off()
 
-png("Figures/xyplot_san.png")
-xyplot(eval_san)
+png("Figures/xyplot_yessan.png")
+xyplot(eval_yessan)
 dev.off()
-png("Figures/autocorr_san.png")
-autocorr.plot(eval_san)
+png("Figures/autocorr_yessan.png")
+autocorr.plot(eval_yessan)
 dev.off()
 
 png("Figures/xyplot_nosan.png")
