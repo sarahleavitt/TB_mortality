@@ -47,7 +47,7 @@ m_one_strata <- function(){
   theta <- 1/tau
   #sdlog of all survival densities (study-specific and overall)
   sdlog <- sqrt(1/taulog)
-  #Overall median survival for each severity
+  #Overall meanlog parameter and median survival for each strata value
   meanlog_strata0 <- alpha
   meanlog_strata1 <- alpha + bstrata
   med_strata0 <- exp(alpha)
@@ -171,10 +171,11 @@ eval_loc <- output_time$eval
 res_san <- output_time$res
 eval_san <- output_time$eval
 
-save(data, res_time, eval_time, res_loc, eval_loc, res_san, eval_san,
-     file = "R/bayesian_onestrata.RData")
-
 form_time <- formatBayesian(mortality, res_time, data, label = "Time", fixed = TRUE)
+form_loc <- formatBayesian(mortality, res_loc, data, label = "Location", fixed = TRUE)
+form_san <- formatBayesian(mortality, res_san, data, label = "Sanatorium", fixed = TRUE)
+
+save(form_time, form_loc, form_san, file = "R/bayesian_onestrata.RData")
 
 png("Figures/xyplot_time.png")
 xyplot(eval_time)

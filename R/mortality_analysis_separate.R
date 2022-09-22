@@ -122,27 +122,119 @@ n.thin <- 1
 #Subsetting and formatting data
 mortality_strata <- mortality %>%
   #Removing severity stratified mortality data for study 79_1023 (only 4-year follow-up)
-  filter(!cohort_id %in% c("79_1023_5", "79_1023_6", "79_1023_7")) %>%
+  filter(!cohort_id %in% c("79_1023_5", "79_1023_6", "79_1023_7"))
+
+#Time period stratification
+pre <- mortality_strata %>%
+  filter(time_period == "pre-1930") %>%
   mutate(study_id_num = as.numeric(factor(study_id)))
 
-#Running the model
-output_comp <- run_comp(mortality_strata, n.iter = n.iter, n.burnin = n.burnin,
-                        n.thin = n.thin)
+post <- mortality_strata %>%
+  filter(time_period == "post-1930") %>%
+  mutate(study_id_num = as.numeric(factor(study_id)))
+
+output_pre <- run_comp(pre, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+output_post <- run_comp(post, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+
+
+#Location stratification
+namerica <- mortality_strata %>%
+  filter(location == "North America") %>%
+  mutate(study_id_num = as.numeric(factor(study_id)))
+
+europe <- mortality_strata %>%
+  filter(location == "Europe") %>%
+  mutate(study_id_num = as.numeric(factor(study_id)))
+
+output_namerica <- run_comp(namerica, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+output_europe <- run_comp(europe, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+
+
+#Sanatorium stratification
+san <- mortality_strata %>%
+  filter(sanatorium == "Yes") %>%
+  mutate(study_id_num = as.numeric(factor(study_id)))
+
+nosan <- mortality_strata %>%
+  filter(sanatorium == "No") %>%
+  mutate(study_id_num = as.numeric(factor(study_id)))
+
+output_san <- run_comp(san, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+output_nosan <- run_comp(nosan, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 
 
 #### Formatting and Saving Results ---------------------------------------------
 
-data <- getData(mortality_strata)
-res_comp <- output_comp$res
-eval_comp <- output_comp$eval
+data_pre <- getData(pre)
+res_pre <- output_pre$res
+eval_pre <- output_pre$eval
+data_post <- getData(post)
+res_post <- output_post$res
+eval_post <- output_post$eval
 
-form_comp <- formatBayesian(mortality, res_comp, data, "Combined")
-save(form_comp, file = "R/bayesian_comp.RData")
+data_namerica <- getData(namerica)
+res_namerica <- output_namerica$res
+eval_namerica <- output_namerica$eval
+data_europe <- getData(europe)
+res_europe <- output_europe$res
+eval_europe <- output_europe$eval
 
-png("Figures/xyplot_comp.png")
-xyplot(eval_comp)
+data_san <- getData(san)
+res_san <- output_san$res
+eval_san <- output_san$eval
+data_nosan <- getData(nosan)
+res_nosan <- output_nosan$res
+eval_nosan <- output_nosan$eval
+
+form_pre <- formatBayesian(mortality, res_pre, data_pre, "Pre-1930s")
+form_post <- formatBayesian(mortality, res_post, data_post, "Post-1930s")
+form_namerica <- formatBayesian(mortality, res_namerica, data_namerica, "North America")
+form_europe <- formatBayesian(mortality, res_europe, data_europe, "Europe")
+form_san <- formatBayesian(mortality, res_san, data_san, "Sanatorium/hospital")
+form_nosan <- formatBayesian(mortality, res_post, data_nosan, "Not Sanatorium")
+
+save(form_pre, form_post, form_namerica, form_europe, form_san, form_nosan,
+     file = "R/bayesian_separate.RData")
+
+png("Figures/xyplot_pre.png")
+xyplot(eval_pre)
 dev.off()
-png("Figures/autocorr_comp.png")
-autocorr.plot(eval_comp)
+png("Figures/autocorr_pre.png")
+autocorr.plot(eval_pre)
+dev.off()
+
+png("Figures/xyplot_post.png")
+xyplot(eval_post)
+dev.off()
+png("Figures/autocorr_post.png")
+autocorr.plot(eval_post)
+dev.off()
+
+png("Figures/xyplot_namerica.png")
+xyplot(eval_namerica)
+dev.off()
+png("Figures/autocorr_namerica.png")
+autocorr.plot(eval_namerica)
+dev.off()
+
+png("Figures/xyplot_europe.png")
+xyplot(eval_europe)
+dev.off()
+png("Figures/autocorr_europe.png")
+autocorr.plot(eval_europe)
+dev.off()
+
+png("Figures/xyplot_san.png")
+xyplot(eval_san)
+dev.off()
+png("Figures/autocorr_san.png")
+autocorr.plot(eval_san)
+dev.off()
+
+png("Figures/xyplot_nosan.png")
+xyplot(eval_nosan)
+dev.off()
+png("Figures/autocorr_nosan.png")
+autocorr.plot(eval_nosan)
 dev.off()
 
