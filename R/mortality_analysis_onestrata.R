@@ -127,13 +127,13 @@ mortality <- mortality %>%
          x1 = interval_l,
          x2 = ifelse(death_tb == 0, 10000, interval_r))
 
-# n.iter <- 31000
-# n.burnin <- 1000
-# n.thin <- 30
+n.iter <- 31000
+n.burnin <- 1000
+n.thin <- 30
 
-n.iter <- 100
-n.burnin <- 10
-n.thin <- 1
+# n.iter <- 100
+# n.burnin <- 10
+# n.thin <- 1
 
 
 #Subsetting and formatting data
