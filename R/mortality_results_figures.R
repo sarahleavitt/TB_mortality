@@ -20,18 +20,15 @@ studyid <- read.csv("data/study_id.csv")
 mortality <- read.csv("data/mortality_data.csv")
 load('R/bayesian_clean.RData')
 
-load("R/bayesian_comp.RData")
-load("R/bayesian_separate.RData")
-
 
 #### Survival Curves: Combined -------------------------------------------------
 
-ggplot(form_comp$surv_dens) +
+ggplot(form_comb$surv_dens) +
   geom_line(aes(x = x, y = surv), color = "black", size = 1,
             linetype = "longdash") +
   geom_smooth(aes(x = x, y = surv_est, ymin = cilb, ymax = ciub),
               stat = "identity", linetype = 0, alpha = 0.25, na.rm = TRUE) +
-  geom_line(data = form_comp$ind_surv, aes(x = x, y = surv, group = study_id),
+  geom_line(data = form_comb$ind_surv, aes(x = x, y = surv, group = study_id),
             size = 0.7, alpha = 0.2) +
   scale_y_continuous(name = "Survival, 1 - F(t)", limits = c(0, 1)) +
   scale_x_continuous(name = "Years", limits = c(0, 30)) +
@@ -52,14 +49,14 @@ plot_surv_strata <- function(data1, data2){
     facet_wrap(~label, nrow = 2) +
     geom_line(data = bind_rows(data1$ind_surv, data2$ind_surv),
               aes(x = x, y = surv, group = study_id),
-              size = 1, alpha = 0.3) +
+              size = 0.6, alpha = 0.2) +
     scale_y_continuous(name = "Survival, 1 - F(t)", limits = c(0, 1)) +
     scale_x_continuous(name = "Years", limits = c(0, 30)) +
     theme_bw()
 }
 
 surv_time <- plot_surv_strata(form_pre, form_post)
-ggsave("Figures/survival_curve_time.png", surv_time, width = 5.5, height = 8)
+ggsave("Figures/survival_curve_time.png", surv_time, width = 4.5, height = 6)
 
 surv_loc <- plot_surv_strata(form_namerica, form_europe)
 ggsave("Figures/survival_curve_location.png", surv_loc, width = 5.5, height = 8)
@@ -72,7 +69,7 @@ ggsave("Figures/survival_curve_sanatorium.png", surv_san, width = 5.5, height = 
 
 ##### Forest plots --------------------------------------------------------------------------------
 
-pred_plot_all <- form_comp_all$pred_comb %>%
+pred_plot_all <- form_comb_all$pred_comb %>%
   mutate(category = ifelse(is.na(category), "Overall", category),
          category = factor(category, levels = c("US post-1930", "US pre-1930",
                                                 "Non-US", "Overall"))) %>%

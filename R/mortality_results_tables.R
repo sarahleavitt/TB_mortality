@@ -107,6 +107,8 @@ final_tab <- dist_tab %>%
   full_join(med_tab, by = c("label")) %>%
   full_join(counts, by = c("label"))
 
+write.csv(final_tab, "data/mortality_results_table.csv")
+
 
 #Variance of frailty terms
 theta <- raw_tab %>%
