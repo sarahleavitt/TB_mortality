@@ -18,42 +18,18 @@ studyid <- read.csv("data/study_id.csv")
 
 #Reading in individual mortality data and analysis results
 mortality <- read.csv("data/mortality_data.csv")
-load('R/bayesian_mortality.RData')
-load('R/bayesian_all.RData')
-load('R/bayesian_us.RData')
-load('R/bayesian_nonus.RData')
-load('R/bayesian_post.RData')
-load('R/bayesian_pre.RData')
-load('R/bayesian_san.RData')
+
+load('R/bayesian_raw.RData')
+load('R/bayesian_clean.RData')
 
 
 
-#### Table of Main Results -------------------------------------------------------------------------
+#### Table of Main Results -----------------------------------------------------
 
 #Combining raw tables from results lists
-raw_tab <- bind_rows(form_comp_all$param, form_sev_all$param,
-                     form_comp_us$param, form_sev_us$param,
-                     form_comp_nonus$param, form_sev_nonus$param,
-                     form_comp_post$param, form_sev_post$param,
-                     form_comp_pre$param, form_sev_pre$param,
-                     form_san$param, form_nosan$param)
-
-#Adding formatted, ordered labels
-raw_tab <- raw_tab %>%
-  mutate(Severity = ifelse(is.na(severity), label,
-                           ifelse(label == "Severity_all", paste0(severity, "_all"),
-                                  ifelse(label == "Severity_us", paste0(severity, "_us"),
-                                         ifelse(label == "Severity_nonus", paste0(severity, "_nonus"),
-                                                ifelse(label == "Severity_post", paste0(severity, "_post"),
-                                                       ifelse(label == "Severity_pre", paste0(severity, "_pre"),
-                                                              label)))))),
-         Severity = factor(Severity, level = c("Minimal_all", "Moderate_all", "Advanced_all", "Combined_all",
-                                               "Minimal_us", "Moderate_us", "Advanced_us", "Combined_us",
-                                               "Minimal_nonus", "Moderate_nonus", "Advanced_nonus", "Combined_nonus",
-                                               "Minimal_post", "Moderate_post", "Advanced_post", "Combined_post",
-                                               "Minimal_pre", "Moderate_pre", "Advanced_pre", "Combined_pre",
-                                               "Sanatorium/hospital", "Non-Sanatorium"))) %>%
-  arrange(Severity)
+raw_tab <- bind_rows(form_comb$param, form_pre$param, form_post$param,
+                     form_namerica$param, form_europe$param, form_yessan$param,
+                     form_nosan$param)
 
 #Extracting the survival probabilities
 pred1_tab <- raw_tab %>%
@@ -61,21 +37,30 @@ pred1_tab <- raw_tab %>%
   mutate(`1-Year Survival (95% CI)` = paste0(round(est, 2), " (",
                                              round(cilb, 2), ", ",
                                              round(ciub, 2), ")")) %>%
-  select(Severity, `1-Year Survival (95% CI)`)
+  select(label, `1-Year Survival (95% CI)`)
 
 pred5_tab <- raw_tab %>%
   filter(value == "pred5") %>%
   mutate(`5-Year Survival (95% CI)` = paste0(round(est, 2), " (",
                                              round(cilb, 2), ", ",
                                              round(ciub, 2), ")")) %>%
-  select(Severity, `5-Year Survival (95% CI)`)
+  select(label, `5-Year Survival (95% CI)`)
 
 pred10_tab <- raw_tab %>%
   filter(value == "pred10") %>%
   mutate(`10-Year Survival (95% CI)` = paste0(round(est, 2), " (",
                                               round(cilb, 2), ", ",
                                               round(ciub, 2), ")")) %>%
-  select(Severity, `10-Year Survival (95% CI)`)
+  select(label, `10-Year Survival (95% CI)`)
+
+
+#Extracting median survival
+med_tab <- raw_tab %>%
+  filter(value == "median") %>%
+  mutate(`Median Survival (95% CI)` = paste0(round(est, 2), " (",
+                                              round(cilb, 2), ", ",
+                                              round(ciub, 2), ")")) %>%
+  select(label, `Median Survival (95% CI)`)
 
 
 #Extracting the distribution parameters
@@ -88,115 +73,40 @@ dist_tab <- raw_tab %>%
   full_join(sdlog, by = "label") %>%
   mutate(`Survival Distribution` = paste0("lognormal(", round(est, 2), ", ",
                                           round(sdlog, 2), ")")) %>%
-  select(Severity, `Survival Distribution`)
+  select(label, `Survival Distribution`)
 
 
-#UPDATE
-
-#Finding number of papers, cohorts, individual for each analysis
-data_comp_all2 <- as.data.frame(t(data_comp_all[[2]]))
-data_comp_all2$Severity <- "Combined_all"
-data_comp_us2 <- as.data.frame(t(data_comp_us[[2]]))
-data_comp_us2$Severity <- "Combined_us"
-data_comp_nonus2 <- as.data.frame(t(data_comp_nonus[[2]]))
-data_comp_nonus2$Severity <- "Combined_nonus"
-data_comp_post2 <- as.data.frame(t(data_comp_post[[2]]))
-data_comp_post2$Severity <- "Combined_post"
-data_comp_pre2 <- as.data.frame(t(data_comp_pre[[2]]))
-data_comp_pre2$Severity <- "Combined_pre"
-data_san2 <- as.data.frame(t(data_san[[2]]))
-data_san2$Severity <- "Sanatorium/hospital"
+# Finding number of papers, cohorts, individuals
+data_comb2 <- as.data.frame(t(data_comb[[2]]))
+data_comb2$label <- "Combined"
+data_pre2 <- as.data.frame(t(data_pre[[2]]))
+data_pre2$label <- "Pre-1930"
+data_post2 <- as.data.frame(t(data_post[[2]]))
+data_post2$label <- "Post-1930"
+data_namerica2 <- as.data.frame(t(data_namerica[[2]]))
+data_namerica2$label <- "North America"
+data_europe2 <- as.data.frame(t(data_europe[[2]]))
+data_europe2$label <- "Europe"
+data_yessan2 <- as.data.frame(t(data_yessan[[2]]))
+data_yessan2$label <- "Sanatorium/hospital"
 data_nosan2 <- as.data.frame(t(data_nosan[[2]]))
-data_nosan2$Severity <- "Non-Sanatorium"
+data_nosan2$label <- "Non-Sanatorium"
 
-counts_comp <- bind_rows(data_comp_all2, data_comp_us2, data_comp_nonus2,
-                         data_comp_post2, data_comp_pre2, data_san2, data_nosan2)
-
-#Counts stratified by severity for all studies
-mortality_sev <- mortality %>% filter(severity != "Unknown")
-
-counts_all <- mortality_sev %>%
-  group_by(severity) %>%
-  summarize(nStudies = length(unique(study_id)),
-            nCohorts = length(unique(cohort_id)),
-            nIndividuals = n(),
-            .groups = "drop") %>%
-  mutate(Severity = paste0(severity, "_all"))
-
-
-#Counts stratified by severity for US studies
-mortality_us <- mortality %>% filter(severity != "Unknown",
-                                     study_id %in% c("1029", "93", "45", "63", "67", "90_1016"))
-
-counts_us <- mortality_us %>%
-  group_by(severity) %>%
-  summarize(nStudies = length(unique(study_id)),
-            nCohorts = length(unique(cohort_id)),
-            nIndividuals = n(),
-            .groups = "drop") %>%
-  mutate(Severity = paste0(severity, "_us"))
-
-
-#Counts stratified by severity for Non-US studies
-mortality_nonus <- mortality %>% filter(severity != "Unknown",
-                                     !study_id %in% c("1029", "93", "45", "63", "67", "90_1016"))
-
-counts_nonus <- mortality_nonus %>%
-  group_by(severity) %>%
-  summarize(nStudies = length(unique(study_id)),
-            nCohorts = length(unique(cohort_id)),
-            nIndividuals = n(),
-            .groups = "drop") %>%
-  mutate(Severity = paste0(severity, "_nonus"))
-
-
-#Counts stratified by severity for US post-1930s subset
-mortality_post <- mortality %>% filter(severity != "Unknown", study_id %in% c("1029", "93", "45"))
-
-counts_post <- mortality_post %>%
-  group_by(severity) %>%
-  summarize(nStudies = length(unique(study_id)),
-            nCohorts = length(unique(cohort_id)),
-            nIndividuals = n(),
-            .groups = "drop") %>%
-  mutate(Severity = paste0(severity, "_post"))
-
-
-#Counts stratified by severity for US pre-1930s subset
-mortality_pre <- mortality %>% filter(severity != "Unknown", study_id %in% c("63", "67", "90_1016"))
-
-counts_pre <- mortality_pre %>%
-  group_by(severity) %>%
-  summarize(nStudies = length(unique(study_id)),
-            nCohorts = length(unique(cohort_id)),
-            nIndividuals = n(),
-            .groups = "drop") %>%
-  mutate(Severity = paste0(severity, "_pre"))
-
-
-counts_initial <- bind_rows(counts_comp, counts_all, counts_us, counts_nonus,
-                            counts_post, counts_pre) %>%
-  select(Severity, `Number of Studies` = nStudies,
+counts <- bind_rows(data_comb2, data_pre2, data_post2, data_namerica2,
+                    data_europe2, data_yessan2, data_nosan2) %>%
+  select(label, `Number of Studies` = nStudies,
          `Number of Cohorts` = nCohorts,
          `Number of Individuals` = nIndividuals)
 
 
-
 #Combining the tables
 final_tab <- dist_tab %>%
-  full_join(pred1_tab, by = c("Severity")) %>%
-  full_join(pred5_tab, by = c("Severity")) %>%
-  full_join(pred10_tab, by = c("Severity")) %>%
-  full_join(counts_initial, by = c("Severity"))
+  full_join(pred1_tab, by = c("label")) %>%
+  full_join(pred5_tab, by = c("label")) %>%
+  full_join(pred10_tab, by = c("label")) %>%
+  full_join(med_tab, by = c("label")) %>%
+  full_join(counts, by = c("label"))
 
-
-#Separating tables for paper
-all_tab <- final_tab %>% filter(grepl("_all", Severity))
-us_tab <- final_tab %>% filter(grepl("_us", Severity))
-nonus_tab <- final_tab %>% filter(grepl("_nonus", Severity))
-post_tab <- final_tab %>% filter(grepl("_post", Severity))
-pre_tab <- final_tab %>% filter(grepl("_pre", Severity))
-san_tab <- final_tab %>% filter(grepl("San", Severity))
 
 #Variance of frailty terms
 theta <- raw_tab %>%

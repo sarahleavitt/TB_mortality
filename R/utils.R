@@ -172,93 +172,46 @@ getData <- function(data){
 
 
 ## Function to format the parameter table from the Bayesian analysis
-format_param <- function(res, label, fixed){
+format_param <- function(res, label){
   
   #Parameter values
-  if(fixed == FALSE){
-    
-    param <- res[row.names(res) %in% c("mu", "sdlog", "theta", "med_comp",
-                                       "pred_comp[1]", "pred_comp[5]", "pred_comp[10]"), ]
-    names(param) <- c("cilb", "lowerquant", "est", "upperquant", "ciub")
-    param <- param %>% mutate(value = row.names(param),
-                              value = ifelse(value == "mu", "meanlog",
-                                             ifelse(value == "med_comp", "median",
-                                                    gsub("_comp\\[|\\]", "", value))),
-                              label = label)
-  }else{
-    param <- res[row.names(res) %in% c("meanlog_strata0", "meanlog_strata1",
-                                       "sdlog", "theta", "med_strata0", "med_strata1", "med_diff",
-                                       "pred_strata0[1]", "pred_strata0[5]", "pred_strata0[10]",
-                                       "pred_strata1[1]", "pred_strata1[5]", "pred_strata1[10]"), ]
-    names(param) <- c("cilb", "lowerquant", "est", "upperquant", "ciub")
-    param <- param %>% mutate(label = label,
-                              value = gsub("_[a-z0-9]*$|_[a-z0-9]*\\[|\\]", "", row.names(.)),
-                              value = ifelse(value == "med", "median", value),
-                              strata = ifelse(grepl("strata0", row.names(.)), "ref",
-                                              ifelse(grepl("strata1", row.names(.)), "other", NA)))
-  }
+  param <- res[row.names(res) %in% c("mu", "sdlog", "theta", "med_comp",
+                                     "pred_comp[1]", "pred_comp[5]", "pred_comp[10]"), ]
+  names(param) <- c("cilb", "lowerquant", "est", "upperquant", "ciub")
+  param <- param %>% mutate(value = row.names(param),
+                            value = ifelse(value == "mu", "meanlog",
+                                           ifelse(value == "med_comp", "median",
+                                                  gsub("_comp\\[|\\]", "", value))),
+                            label = label)  
+
   return(param)
 }
 
 ## Function to format the overall survival and density table from the Bayesian analysis
-format_surv_dens <- function(param, res, label, fixed){
+format_surv_dens <- function(param, res, label){
   
-  if(fixed == FALSE){
-    
-    #Overall survival and density curves
-    sdlog <- param %>% filter(value == "sdlog") %>% pull(est)
-    meanlog <- param %>% filter(value == "meanlog") %>% pull(est)
-    x <- seq(0, 30, 0.01)
-    dens <- dlnorm(x, meanlog, sdlog)
-    surv <- plnorm(x, meanlog, sdlog, lower.tail = FALSE)
-    
-    #Credible bounds for survival curves
-    credint <- res[grepl("pred_comp", row.names(res)), ]
-    credint <- credint %>%
-      mutate(x = as.numeric(str_extract(row.names(.), "[0-9]+"))) %>%
-      select(x, surv_est = `50%`, cilb = `2.5%`, ciub = `97.5%`) %>%
-      bind_rows(c(x = 0, surv_est = 1, cilb = 1, ciub = 1))
-    
-    surv_dens <- cbind.data.frame(x, dens, surv, "label" = label) %>%
-      full_join(credint, by = "x")
-    
-  }else{
-    
-    #Overall survival and density curves
-    sdlog <- param %>% filter(value == "sdlog") %>% pull(est)
-    surv_dens <- NULL
-    x <- seq(0, 30, 0.1)
-    for(s in c("ref", "other")){
-      meanlog <- param %>% filter(strata == s, value == "meanlog") %>% pull(est)
-      
-      dens <- dlnorm(x, meanlog, sdlog)
-      surv <- plnorm(x, meanlog, sdlog, lower.tail = FALSE)
-      densTemp <- cbind.data.frame(x, "strata" = s, meanlog, sdlog, dens, surv)
-      
-      surv_dens <- bind_rows(surv_dens, densTemp)
-    }
-    
-    #Credible bounds for survival curves
-    credint <- res[grepl("pred_[a-z]*", row.names(res)), ]
-    credint <- credint %>%
-      mutate(x = as.numeric(gsub("\\[|\\]", "",
-                                 str_extract(row.names(.), "\\[[0-9]+\\]"))),
-             strata = ifelse(grepl("strata0", row.names(.)), "ref",
-                               ifelse(grepl("strata1", row.names(.)), "other", NA))) %>%
-      select(x, strata, surv_est = `50%`, cilb = `2.5%`, ciub = `97.5%`) %>%
-      bind_rows(cbind.data.frame(x = 0, strata = "ref", surv_est = 1, cilb = 1, ciub = 1),
-                cbind.data.frame(x = 0, strata = "other", surv_est = 1, cilb = 1, ciub = 1))
-    
-    surv_dens <- surv_dens %>% 
-      mutate(label = label) %>%
-      full_join(credint, by = c("x", "strata"))
-  }
+  #Overall survival and density curves
+  sdlog <- param %>% filter(value == "sdlog") %>% pull(est)
+  meanlog <- param %>% filter(value == "meanlog") %>% pull(est)
+  x <- seq(0, 30, 0.01)
+  dens <- dlnorm(x, meanlog, sdlog)
+  surv <- plnorm(x, meanlog, sdlog, lower.tail = FALSE)
+  
+  #Credible bounds for survival curves
+  credint <- res[grepl("pred_comp", row.names(res)), ]
+  credint <- credint %>%
+    mutate(x = as.numeric(str_extract(row.names(.), "[0-9]+"))) %>%
+    select(x, surv_est = `50%`, cilb = `2.5%`, ciub = `97.5%`) %>%
+    bind_rows(c(x = 0, surv_est = 1, cilb = 1, ciub = 1))
+  
+  surv_dens <- cbind.data.frame(x, dens, surv, "label" = label) %>%
+    full_join(credint, by = "x")
   
   return(surv_dens)
 }
 
 ## Function to format a raw table of study-level results from the Bayesian analysis
-format_ind_est <- function(covar, res, data, fixed){
+format_ind_est <- function(covar, res, data){
   
   #Individual study median
   med_ind <- as.data.frame(res[grepl("med_ind", row.names(res)),])
@@ -275,17 +228,10 @@ format_ind_est <- function(covar, res, data, fixed){
     select(-rown)
   
   #Individual study meanlog
-  if(fixed == FALSE){
-    mean_ind <- as.data.frame(res[grepl("meanlog", row.names(res)),])
-    mean_ind <- mean_ind %>%
-      mutate(study_id_num = as.numeric(gsub("meanlog\\[|\\]", "", row.names(mean_ind))),
-             value = "meanlog")
-  }else{
-    mean_ind <- as.data.frame(res[grepl("meanlog_ind", row.names(res)),])
-    mean_ind <- mean_ind %>%
-      mutate(study_id_num = as.numeric(gsub("meanlog_ind\\[|\\]", "", row.names(mean_ind))),
-             value = "meanlog")
-  }
+  mean_ind <- as.data.frame(res[grepl("meanlog", row.names(res)),])
+  mean_ind <- mean_ind %>%
+    mutate(study_id_num = as.numeric(gsub("meanlog\\[|\\]", "", row.names(mean_ind))),
+           value = "meanlog")
   
   #Combining the above
   ind_est <- bind_rows(med_ind, mean_ind, pred_ind)
@@ -326,7 +272,7 @@ format_ind_surv <- function(ind_est, covar, param, label){
 }
 
 ## Function to format the study-level predictions (median survival and survival probabilities)
-format_pred_comb <- function(ind_est, param, label, fixed){
+format_pred_comb <- function(ind_est, param, label){
   
   #Combining study-specific and overall median and predictions
   pred_comb <- ind_est %>% 
@@ -335,17 +281,9 @@ format_pred_comb <- function(ind_est, param, label, fixed){
     mutate(shape = ifelse(is.na(study_id), "Overall", "Individual")) %>%
     select(-label)
   
-  if(fixed == FALSE){
-    pred_comb <- pred_comb %>%
-      replace_na(list(study_id = "Overall",
-                      first_author = "Overall"))
-  }else{
-    pred_comb <- pred_comb %>%
-      mutate(study_id = ifelse(is.na(study_id), paste("Overall", strata, sep = "_"),
-                               study_id),
-             first_author = ifelse(is.na(first_author), "Overall", first_author))
-    
-  }
+  pred_comb <- pred_comb %>%
+    replace_na(list(study_id = "Overall",
+                    first_author = "Overall"))
   
   pred_comb <- pred_comb %>% 
     mutate(pred_label = factor(value, levels = c("pred1", "pred5", "pred10", "median"),
@@ -357,13 +295,13 @@ format_pred_comb <- function(ind_est, param, label, fixed){
 
 
 ## Function to format results of Bayesian analysis
-formatBayesian <- function(mortalityData, res, data, label, fixed = FALSE){
+formatBayesian <- function(mortalityData, res, data, label){
   
   #Parameter table
-  param <- format_param(res, label, fixed)
+  param <- format_param(res, label)
   
   #Overall survival and density table
-  surv_dens <- format_surv_dens(param, res, label, fixed)
+  surv_dens <- format_surv_dens(param, res, label)
   
   #Creating table of covariate data
   covar <- mortalityData %>%
@@ -377,13 +315,13 @@ formatBayesian <- function(mortalityData, res, data, label, fixed = FALSE){
               .groups = "drop")
   
   #Study-level raw results
-  ind_est <- format_ind_est(covar, res, data, fixed)
+  ind_est <- format_ind_est(covar, res, data)
 
   #Study-level survival curves
   ind_surv <- format_ind_surv(ind_est, covar, param, label)
 
   #Study-level predictions (median survival and survival probabilities)
-  pred_comb <- format_pred_comb(ind_est, param, label, fixed)
+  pred_comb <- format_pred_comb(ind_est, param, label)
   
   return(list("surv_dens" = surv_dens, "param" = param,
               "pred_comb" = pred_comb, "ind_surv" = ind_surv))

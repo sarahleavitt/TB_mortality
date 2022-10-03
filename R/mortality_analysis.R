@@ -4,7 +4,8 @@
 
 ##############################################################################
 # This program contains the functions to perform the mortality Bayesian 
-# meta-analysis for the complete model (no stratification).
+# meta-analysis for the combined model and stratified models.
+# This program takes about 1 hour to run.
 ##############################################################################
 
 options(scipen=999)
@@ -14,7 +15,6 @@ set.seed(150183)
 rm(list = ls())
 source("R/utils.R")
 reload_source()
-source("R/mortality_functions.R")
 
 #Reading in individual mortality data
 mortality <- read.csv("data/mortality_data.csv")
@@ -125,24 +125,85 @@ mortality_strata <- mortality %>%
   filter(!cohort_id %in% c("79_1023_5", "79_1023_6", "79_1023_7")) %>%
   mutate(study_id_num = as.numeric(factor(study_id)))
 
-#Running the model
-output_comp <- run_comp(mortality_strata, n.iter = n.iter, n.burnin = n.burnin,
+
+#### Running the Models --------------------------------------------------------
+
+## Combined Model
+output_comb <- run_comp(mortality_strata, n.iter = n.iter, n.burnin = n.burnin,
                         n.thin = n.thin)
+
+
+## Time period stratification
+pre <- mortality_strata %>%
+  filter(time_period == "pre-1930") %>%
+  mutate(study_id_num = as.numeric(factor(study_id)))
+
+post <- mortality_strata %>%
+  filter(time_period == "post-1930") %>%
+  mutate(study_id_num = as.numeric(factor(study_id)))
+
+output_pre <- run_comp(pre, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+output_post <- run_comp(post, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+
+
+## Location stratification
+namerica <- mortality_strata %>%
+  filter(location == "North America") %>%
+  mutate(study_id_num = as.numeric(factor(study_id)))
+
+europe <- mortality_strata %>%
+  filter(location == "Europe") %>%
+  mutate(study_id_num = as.numeric(factor(study_id)))
+
+output_namerica <- run_comp(namerica, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+output_europe <- run_comp(europe, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+
+
+## Sanatorium stratification
+yessan <- mortality_strata %>%
+  filter(sanatorium == "Yes") %>%
+  mutate(study_id_num = as.numeric(factor(study_id)))
+
+nosan <- mortality_strata %>%
+  filter(sanatorium == "No") %>%
+  mutate(study_id_num = as.numeric(factor(study_id)))
+
+output_yessan <- run_comp(yessan, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+output_nosan <- run_comp(nosan, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
+
 
 
 #### Formatting and Saving Results ---------------------------------------------
 
-data <- getData(mortality_strata)
-res_comp <- output_comp$res
-eval_comp <- output_comp$eval
+data_comb <- getData(mortality_strata)
+res_comb <- output_comb$res
+eval_comb <- output_comb$eval
 
-form_comp <- formatBayesian(mortality, res_comp, data, "Combined")
-save(form_comp, file = "R/bayesian_comp.RData")
+data_pre <- getData(pre)
+res_pre <- output_pre$res
+eval_pre <- output_pre$eval
+data_post <- getData(post)
+res_post <- output_post$res
+eval_post <- output_post$eval
 
-png("Figures/xyplot_comp.png")
-xyplot(eval_comp)
-dev.off()
-png("Figures/autocorr_comp.png")
-autocorr.plot(eval_comp)
-dev.off()
+data_namerica <- getData(namerica)
+res_namerica <- output_namerica$res
+eval_namerica <- output_namerica$eval
+data_europe <- getData(europe)
+res_europe <- output_europe$res
+eval_europe <- output_europe$eval
 
+data_yessan <- getData(yessan)
+res_yessan <- output_yessan$res
+eval_yessan <- output_yessan$eval
+data_nosan <- getData(nosan)
+res_nosan <- output_nosan$res
+eval_nosan <- output_nosan$eval
+
+save(data_comb, res_comb, eval_comb,
+     data_pre, res_pre, eval_pre,
+     data_post, res_post, eval_post,
+     data_namerica, res_namerica, eval_namerica,
+     data_europe, res_europe, eval_europe,
+     data_yessan, res_yessan, eval_yessan,
+     data_nosan, res_nosan, eval_nosan, file = "R/bayesian_raw.RData")
