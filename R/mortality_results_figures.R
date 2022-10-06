@@ -39,6 +39,7 @@ ggsave("Figures/survival_curve_all.png", width = 6, height = 5.5)
 
 #### Survival Curves: Stratified -----------------------------------------------
 
+# Separate plots per stratificaiton
 plot_surv_strata <- function(data1, data2){
 
   p <- ggplot(bind_rows(data1$surv_dens, data2$surv_dens)) +
@@ -59,70 +60,158 @@ surv_time <- plot_surv_strata(form_pre, form_post)
 ggsave("Figures/survival_curve_time.png", surv_time, width = 4.5, height = 6)
 
 surv_loc <- plot_surv_strata(form_namerica, form_europe)
-ggsave("Figures/survival_curve_location.png", surv_loc, width = 5.5, height = 8)
+ggsave("Figures/survival_curve_location.png", surv_loc, width = 4.5, height = 6)
 
 surv_san <- plot_surv_strata(form_yessan, form_nosan)
-ggsave("Figures/survival_curve_sanatorium.png", surv_san, width = 5.5, height = 8)
+ggsave("Figures/survival_curve_sanatorium.png", surv_san, width = 4.5, height = 6)
 
 
+# Combined plot for all stratifications
+
+surv_all <- bind_rows(form_pre$surv_dens, form_post$surv_dens,
+                      form_namerica$surv_dens, form_europe$surv_dens,
+                      form_yessan$surv_dens, form_nosan$surv_dens) %>%
+  mutate(label = factor(label, levels = c("Pre-1930", "North America",
+                                          "Sanatorium/hospital",
+                                          "Post-1930", "Europe",
+                                          "Non-Sanatorium")))
+
+ind_all <- bind_rows(form_pre$ind_surv, form_post$ind_surv,
+                     form_namerica$ind_surv, form_europe$ind_surv,
+                     form_yessan$ind_surv, form_nosan$ind_surv) %>%
+  mutate(label = factor(label, levels = c("Pre-1930", "North America",
+                                          "Sanatorium/hospital",
+                                          "Post-1930", "Europe",
+                                          "Non-Sanatorium")))
+ggplot(surv_all) +
+  geom_line(aes(x = x, y = surv),
+            color = "black", size = 1, linetype = "longdash") +
+  geom_smooth(aes(x = x, y = surv_est, ymin = cilb, ymax = ciub),
+              stat = "identity", linetype = 0, alpha = 0.4) +
+  facet_wrap(~label, nrow = 2) +
+  geom_line(data = ind_all,
+            aes(x = x, y = surv, group = study_id),
+            size = 0.6, alpha = 0.2) +
+  scale_y_continuous(name = "Survival, 1 - F(t)", limits = c(0, 1)) +
+  scale_x_continuous(name = "Years", limits = c(0, 30)) +
+  theme_bw()
+
+ggsave("Figures/survival_curve_all.png", width = 6.5, height = 5)
 
 
 ##### Forest plots --------------------------------------------------------------------------------
 
-pred_plot_all <- form_comb_all$pred_comb %>%
-  mutate(category = ifelse(is.na(category), "Overall", category),
-         category = factor(category, levels = c("US post-1930", "US pre-1930",
-                                                "Non-US", "Overall"))) %>%
-  arrange(desc(category), desc(first_author)) %>%
-  mutate(first_author = factor(first_author, levels=unique(first_author)))
+pred_plot_all1 <- form_comb$pred_comb %>%
+  arrange(desc(first_author)) %>%
+  mutate(first_author = factor(first_author, levels = unique(first_author)))
 
-pred_plot_sev <- form_sev_all$pred_comb %>%
-  mutate(category = ifelse(is.na(category), "Overall", category),
-         category = factor(category, levels = c("US post-1930", "US pre-1930", 
-                                                "Non-US", "Overall"))) %>%
-  arrange(desc(category), desc(first_author)) %>%
-  mutate(first_author = factor(first_author, levels=unique(first_author)))
-
-
-#TB survival for full model
-ggplot(pred_plot_all %>% filter(value != "median"),
-             aes(x = est, y = first_author, xmin = cilb, xmax = ciub,
-                 shape = shape, color = category)) +
-  facet_grid(severity ~ pred_label, scales = "free", space = "free") +
-  geom_point(aes(color = category)) +
-  geom_point(data = pred_plot_all %>% filter(shape == "Overall" & value != "median"),
+# Forest plot for combined model, no coloring
+ggplot(pred_plot_all1 %>% filter(value != "median"),
+             aes(x = est, y = first_author, xmin = cilb, xmax = ciub)) +
+  facet_grid(shape ~ pred_label, scales = "free", space = "free") +
+  geom_point() +
+  geom_point(data = pred_plot_all1 %>% filter(shape == "Overall",
+                                             value != "median"),
              color = 'black', shape = 18, size = 3) +
   geom_errorbar(width = 0.5) +
-  scale_x_continuous(name = "1-Year Survival Probability", limits = c(0, 1),
+  scale_x_continuous(name = "Survival Probability", limits = c(0, 1),
                      breaks = c(0, 0.5, 1)) +
   theme_bw() +
   theme(axis.title.y = element_blank(),
-        legend.position = "bottom") +
-  scale_color_manual("Type of Study",
-                     values = c("Non-US" = "mediumturquoise", "US post-1930" = "mediumvioletred",
-                                "US pre-1930" = "royalblue3", "Overall" = "black")) +
-  scale_shape_discrete(guide = "none") +
-  ggsave("Figures/forest_full.png", width = 7, height = 6)
+        legend.position = "bottom",
+        strip.text.y = element_blank())
 
-#TB survival for stratified model
-ggplot(pred_plot_sev %>% filter(value != "median"),
-              aes(x = est, y = first_author, xmin = cilb, xmax = ciub, shape = shape,
-                  color = category)) +
-  geom_point(aes(color = category)) +
-  geom_point(data = pred_plot_sev %>% filter(shape == "Overall" & value != "median"),
+ggsave("Figures/forest_comb1.png", width = 6.5, height = 3.5)
+
+
+pred_plot_all2 <- form_comb$pred_comb %>%
+  left_join(studyid) %>%
+  arrange(desc(enrollment_start)) %>%
+  mutate(first_author = factor(first_author, levels = unique(first_author)),
+         location = ifelse(is.na(location), "", location),
+         location = factor(location, levels = c("North America",
+                                                "Europe", "")))
+
+# Forest plot for combined model, no coloring
+ggplot(pred_plot_all2 %>% filter(value != "median"),
+       aes(x = est, y = first_author, xmin = cilb, xmax = ciub)) +
+  facet_grid(location ~ pred_label, scales = "free", space = "free") +
+  geom_point(aes(color = sanatorium)) +
+  geom_point(data = pred_plot_all2 %>% filter(shape == "Overall",
+                                              value != "median"),
              color = 'black', shape = 18, size = 3) +
-  geom_errorbar(width = 0.5) +
-  scale_x_continuous(name = "1-Year Survival Probability", limits = c(0, 1),
+  geom_errorbar(aes(color = sanatorium), width = 0.5) +
+  geom_errorbar(data = pred_plot_all2 %>% filter(shape == "Overall",
+                                                 value != "median"),
+                width = 0.5) +
+  scale_x_continuous(name = "Survival Probability", limits = c(0, 1),
                      breaks = c(0, 0.5, 1)) +
-  facet_grid(severity ~ pred_label, scales = "free", space = "free") +
+  scale_color_discrete(name = "Treatment Location", na.translate = FALSE,
+                       labels = c("Non-Sanatorium", "Sanatorium/hospital")) +
   theme_bw() +
   theme(axis.title.y = element_blank(),
-        legend.position = "bottom") +
-  scale_color_manual("Type of Study",
-                     values = c("Non-US" = "mediumturquoise", "US post-1930" = "mediumvioletred",
-                                "US pre-1930" = "royalblue3", "Overall" = "black")) +
-  scale_shape_discrete(guide = "none") +
-  ggsave("Figures/forest_stratified.png", width = 7, height = 6)
+        legend.position = "bottom")
+
+ggsave("Figures/forest_comb2.png", width = 6.5, height = 4.5)
+
+
+
+# Forest plot for stratifications each separate
+
+pred_plot_time <- bind_rows(form_pre$pred_comb, form_post$pred_comb) %>%
+  group_by(label) %>%
+  arrange(desc(first_author)) %>%
+  mutate(first_author = factor(first_author, levels = unique(first_author))) %>%
+  mutate(labelf = ifelse(shape == "Overall" & label == "Pre-1930", " ",
+                         ifelse(shape == "Overall" & label == "Post-1930", "  ",
+                                label)),
+         labelf = factor(labelf, levels = c("Pre-1930", " ", "Post-1930", "  ")))
+
+pred_plot_loc <- bind_rows(form_namerica$pred_comb, form_europe$pred_comb) %>%
+  group_by(label) %>%
+  arrange(desc(first_author)) %>%
+  mutate(first_author = factor(first_author, levels = unique(first_author))) %>%
+  mutate(labelf = ifelse(shape == "Overall" & label == "North America", " ",
+                         ifelse(shape == "Overall" & label == "Europe", "  ",
+                                label)),
+         labelf = factor(labelf, levels = c("North America", " ", "Europe", "  ")))
+
+pred_plot_san <- bind_rows(form_yessan$pred_comb, form_nosan$pred_comb) %>%
+  group_by(label) %>%
+  arrange(desc(first_author)) %>%
+  mutate(first_author = factor(first_author, levels = unique(first_author))) %>%
+  mutate(labelf = ifelse(shape == "Overall" & label == "Sanatorium/hospital", " ",
+                         ifelse(shape == "Overall" & label == "Non-Sanatorium", "  ",
+                                label)),
+         labelf = factor(labelf, levels = c("Sanatorium/hospital", " ",
+                                            "Non-Sanatorium", "  ")))
+
+plot_forest <- function(pred_plot){
+  p <- ggplot(pred_plot %>% filter(value != "median"),
+              aes(x = est, y = first_author, xmin = cilb, xmax = ciub)) +
+  geom_point() +
+  geom_point(data = pred_plot %>% filter(shape == "Overall",
+                                             value != "median"),
+             color = 'black', shape = 18, size = 3) +
+  geom_errorbar(width = 0.5) +
+  scale_x_continuous(name = "Survival Probability", limits = c(0, 1),
+                     breaks = c(0, 0.5, 1)) +
+  facet_grid(labelf ~ pred_label, scales = "free", space = "free") +
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        legend.position = "bottom")
+  
+  return(p)
+}
+
+p_time <- plot_forest(pred_plot_time)
+p_loc <- plot_forest(pred_plot_loc)
+p_san <- plot_forest(pred_plot_san)
+
+ggsave("Figures/forest_time.png", p_time, width = 6.5, height = 4)
+ggsave("Figures/forest_loc.png", p_loc, width = 6.5, height = 4)
+ggsave("Figures/forest_san.png", p_san, width = 6.5, height = 4)
+
 
 
 
