@@ -19,7 +19,8 @@ dataList <- read_excel_allsheets("data/pre_chemo_data.xlsx")
 dataList$`Data dictionary` <- NULL
 
 ## Reading in study information
-studyid <- read.csv("data/study_id.csv")
+studyid <- read.csv("data/study_id.csv") %>%
+  select(-start_type)
 
 
 #### Overall counts -------------------------------------------------------------------------------
@@ -76,12 +77,11 @@ mortalityList <- dataList[!names(dataList) %in% c("65", "91", "75_1019", "75_102
 #Converting the study data to individual mortality data
 indAll <- map_dfr(mortalityList, studyToInd, outcome = "mortality")
 
-#Removing people who are censored at the study start
-indAll <- indAll %>% filter(!(death == 0 & interval_l == 0))
-
 #Formatting individual dataset
 mortalityData <- indAll %>%
-  mutate(start_type = ifelse(start_type == "Unknown", "Entry", start_type),
+  mutate(#People who are censored at the study start
+         no_survival = death == 0 & interval_l == 0,
+         start_type = ifelse(start_type == "Unknown", "Entry", start_type),
          #Adding overall average length of stay to bring start_type = 'Exit' start_type = 'Entry'
          interval_l = ifelse(start_type == "Exit", interval_l + 165/365, interval_l),
          interval_r = ifelse(start_type == "Exit", interval_r + 165/365, interval_r),
@@ -103,6 +103,9 @@ mortalityData <- indAll %>%
 
 write.csv(mortalityData, "data/mortality_data.csv", row.names = FALSE)
 
+#Baseline sample size for mortality analysis
+nrow(mortalityData)
+
 
 
 #### Cure Data with severity ----------------------------------------------------------------------
@@ -121,34 +124,6 @@ cureData <- bind_rows(cureData1, cureData2) %>%
   left_join(studyid, by = "study_id")
 
 write.csv(cureData, "data/cure_data.csv", row.names = FALSE)
-
-
-
-#### Table of Study Info
-
-mortalityStudies <- mortalityData %>%
-  group_by(study_id) %>%
-  slice(1) %>%
-  mutate(stratified = ifelse(severity == "Unknown", "No", "Yes"),
-         mortality = "Yes") %>%
-  select(study_id, stratified, start_type, mortality)
-
-cureStudies <- cureData %>%
-  group_by(study_id) %>%
-  slice(1) %>%
-  mutate(cure = "Yes") %>%
-  select(study_id, start_type, cure_time = time, cure)
-
-allStudies <- mortalityStudies %>%
-  full_join(cureStudies, by = c("study_id", "start_type")) %>%
-  left_join(studyid, by = "study_id") %>%
-  mutate(outcome = ifelse(mortality == "Yes" & !is.na(cure), "Mortality/Cure", "Mortality")) %>%
-  arrange(first_author) %>%
-  select(study_id, first_author, year, outcome, stratified, sanatorium,
-         time_period, location, start_type, cure_time)
-
-write.csv(allStudies, "data/meta_analysis_studies.csv", row.names = FALSE)
-  
 
 
 

@@ -16,9 +16,6 @@ reload_source()
 #Reading in the study_id correspondence table
 studyid <- read.csv("data/study_id.csv")
 
-#Reading in individual mortality data and analysis results
-mortality <- read.csv("data/mortality_data.csv")
-
 load('R/bayesian_raw.RData')
 load('R/bayesian_clean.RData')
 

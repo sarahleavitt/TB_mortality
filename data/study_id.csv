@@ -1,19 +1,19 @@
-study_id,first_author,year,sanatorium,time_period,location,enrollment_start
-1029,"Alling, Alling, Lincoln","1954, 1955",No,post-1930,North America,1938
-79_1021,Baart de la Faille,1939,Yes,pre-1930,Europe,1922
-5_1047,Bentley et al.,1954,Yes,post-1930,Europe,1942
-79_1023,Braeuning ,1936,No,pre-1930,Europe,1920
-94,Ferguson,1926,Yes,pre-1930,North America,1917
-93,Heise,1933,Yes,pre-1930,North America,1917
-75_1019,Holst,1906,No,pre-1930,Europe,1891
-75_1035,Lissant Cox,1936,Yes,post-1930,Europe,1934
-44,Lowe,1954,No,post-1930,Europe,1930
-45,Mitchell,1955,Yes,post-1930,North America,1930
-79_1054,Munchbach,1933,Yes,pre-1930,Europe,1920
-63,Rutledge et al.,1919,Yes,pre-1930,North America,1909
-65,Springett,1971,No,post-1930,Europe,1947
-75_1020,Stadler,1903,No,pre-1930,Europe,1893
-67,Stephens,1941,Yes,pre-1930,North America,1919
-75,Tattersall et al. ,1947,No,pre-1930,Europe,1914
-91,Wherrett,1935,Yes,pre-1930,North America,1917
-90_1016,Zacks,1939,No,pre-1930,North America,1927
+study_id,first_author,year,sanatorium,time_period,location,enrollment_start,analysis_type,severity_stratified,start_type
+1029,"Alling, Alling, Lincoln","1954, 1955",No,post-1930,North America,1938,Both,Yes,Entry
+79_1021,Baart de la Faille,1939,Yes,pre-1930,Europe,1922,Recovery,No,Exit
+5_1047,Bentley et al.,1954,Yes,post-1930,Europe,1942,Both,No,Entry
+79_1023,Braeuning ,1936,No,pre-1930,Europe,1920,Both,Yes,Notification/diagnosis
+94,Ferguson,1926,Yes,pre-1930,North America,1917,Both,No,Entry
+93,Heise,1933,Yes,pre-1930,North America,1917,Mortality,Yes,Exit
+75_1019,Holst,1906,No,pre-1930,Europe,1891,Recovery,No,Notification/diagnosis
+75_1035,Lissant Cox,1936,Yes,post-1930,Europe,1934,Both,Yes,Entry
+44,Lowe,1954,No,post-1930,Europe,1930,Mortality,No,Notification/diagnosis
+45,Mitchell,1955,Yes,post-1930,North America,1930,Both,Yes,Entry
+79_1054,Munchbach,1933,Yes,pre-1930,Europe,1920,Recovery,No,Exit
+63,Rutledge et al.,1919,Yes,pre-1930,North America,1909,Mortality,Yes,Exit
+65,Springett,1971,No,post-1930,Europe,1947,Recovery,No,Notification/diagnosis
+75_1020,Stadler,1903,No,pre-1930,Europe,1893,Recovery,No,Notification/diagnosis
+67,Stephens,1941,Yes,pre-1930,North America,1919,Both,Yes,Entry
+75,Tattersall et al. ,1947,No,pre-1930,Europe,1914,Mortality,Yes,Notification/diagnosis
+91,Wherrett,1935,Yes,pre-1930,North America,1917,Recovery,No,Entry
+90_1016,Zacks,1939,No,pre-1930,North America,1927,Mortality,No,Unknown

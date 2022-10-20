@@ -106,6 +106,8 @@ run_comp <- function(df, n.iter = 31000, n.burnin = 1000, n.thin = 30){
 #dinterval() isn't working as it should so make all obs have interval = 1
 #and set x2 to be 10000 (close enough to infinity) for right censored
 mortality <- mortality %>% 
+  #Removing people who are censored at the study start
+  filter(no_survival == FALSE) %>%
   mutate(time = ifelse(death_tb == 0, NA, interval_l),
          interval = 1,
          x1 = interval_l,
