@@ -1,9 +1,9 @@
 #Sarah V. Leavitt
 #Boston University
-#Pre-chemotherapy TB Analysis
+#Pre-chemotherapy TB Mortality Analysis
 
 ##############################################################################
-# This program creates figures and tables of the mortality analysis results
+# This program creates tables of the mortality analysis results
 ##############################################################################
 
 options(scipen=999)

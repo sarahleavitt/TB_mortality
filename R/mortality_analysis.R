@@ -1,10 +1,10 @@
 #Sarah V. Leavitt
 #Boston University
-#Pre-chemotherapy TB Analysis
+#Pre-chemotherapy TB Mortality Analysis
 
 ##############################################################################
-# This program contains the functions to perform the mortality Bayesian 
-# meta-analysis for the combined model and stratified models.
+# This program contains the performs the mortality Bayesian meta-analysis 
+# for the combined model and stratified models.
 # This program takes about 1 hour to run.
 ##############################################################################
 

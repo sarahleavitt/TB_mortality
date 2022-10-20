@@ -1,6 +1,6 @@
 #Sarah V. Leavitt
 #Boston University
-#Pre-chemotherapy TB Analysis
+#Pre-chemotherapy TB Mortality Analysis
 
 ##############################################################################
 # This program finds the disease severity distribution comparing 
