@@ -15,7 +15,7 @@ rm(list = ls())
 source("R/utils.R")
 reload_source()
 
-#Reading in individual mortality data
+#Reading in individual mortality data for modeling
 mortality <- read.csv("data/mortality_data.csv")
 
 #Reading in the study_id correspondence table
@@ -25,9 +25,12 @@ studyid <- read.csv("data/study_id.csv")
 #### Table of severity distribution by study
 
 severity <- mortality %>% 
-  filter(severity != "Unknown") %>%
+  filter(severity != "Unknown",
+         no_survival == FALSE) %>%
   mutate(sanatorium = ifelse(sanatorium == "Yes", "Sanatorium/hospital",
-                             "Non-sanatorium"))
+                             "Non-sanatorium"),
+         severity = factor(severity,
+                           levels = c("Minimal", "Moderate", "Advanced")))
 
 study_severity <- severity %>%
   group_by(study_id) %>%
@@ -76,10 +79,11 @@ ggplot(data = severity, aes(x = sanatorium, fill = severity)) +
   geom_bar(position = position_dodge()) +
   ylab("Number of Patients") +
   xlab("Treatment Location") +
-  scale_fill_discrete(name = "Disease Severity",
+  scale_fill_manual(name = "Disease Severity",
                       breaks = c("Minimal", "Moderate", "Advanced"),
                       labels = c("Minimal", "Moderately\nadvanced",
-                                 "Far advanced")) +
+                                 "Far advanced"),
+                      values = c("grey50", "grey30", "grey10")) +
   theme_bw()
   
 ggsave("Figures/severity_barchart.png", dpi = 300, width = 5, height = 4)
