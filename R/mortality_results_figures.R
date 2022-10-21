@@ -75,8 +75,8 @@ ggsave("Figures/survival_curve_all.png", width = 6.5, height = 5)
 # Forest plot for combined model, sorted by date, stratifed by study location,
 # colored by treatment location
 pred_plot_all <- form_comb$pred_comb %>%
-  left_join(studyid) %>%
-  arrange(desc(enrollment_start)) %>%
+  left_join(studyid %>% select(-start_type)) %>%
+  arrange(desc(enrollment_start), desc(first_author)) %>%
   mutate(location = ifelse(is.na(location), "", location),
          location = factor(location, levels = c("North America",
                                                 "Europe", "")),
@@ -98,7 +98,7 @@ ggplot(pred_plot_all %>% filter(value != "median"),
                 width = 0.5) +
   scale_x_continuous(name = "Survival Probability", limits = c(0, 1),
                      breaks = c(0, 0.5, 1)) +
-  scale_color_discrete(name = "Treatment Location", na.translate = FALSE,
+  scale_color_discrete(name = "Setting", na.translate = FALSE,
                        labels = c("Non-Sanatorium", "Sanatorium/hospital")) +
   theme_bw() +
   theme(axis.title.y = element_blank(),
@@ -110,8 +110,9 @@ ggsave("Figures/forest_comb.png", width = 6.5, height = 4.5)
 
 # Forest plot for stratifications each separate
 pred_plot_time <- bind_rows(form_pre$pred_comb, form_post$pred_comb) %>%
+  left_join(studyid %>% select(-start_type)) %>%
   group_by(label) %>%
-  arrange(desc(first_author)) %>%
+  arrange(desc(enrollment_start), desc(first_author)) %>%
   mutate(first_author = factor(first_author, levels = unique(first_author))) %>%
   mutate(labelf = ifelse(shape == "Overall" & label == "Pre-1930", " ",
                          ifelse(shape == "Overall" & label == "Post-1930", "  ",

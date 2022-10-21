@@ -81,7 +81,6 @@ indAll <- map_dfr(mortalityList, studyToInd, outcome = "mortality")
 mortalityData <- indAll %>%
   mutate(#People who are censored at the study start
          no_survival = death == 0 & interval_l == 0,
-         start_type = ifelse(start_type == "Unknown", "Entry", start_type),
          #Adding overall average length of stay to bring start_type = 'Exit' start_type = 'Entry'
          interval_l = ifelse(start_type == "Exit", interval_l + 165/365, interval_l),
          interval_r = ifelse(start_type == "Exit", interval_r + 165/365, interval_r),

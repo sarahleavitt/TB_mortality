@@ -25,8 +25,7 @@ studyid <- read.csv("data/study_id.csv")
 #### Table of severity distribution by study
 
 severity <- mortality %>% 
-  filter(severity != "Unknown",
-         no_survival == FALSE) %>%
+  filter(severity != "Unknown") %>%
   mutate(sanatorium = ifelse(sanatorium == "Yes", "Sanatorium/hospital",
                              "Non-sanatorium"),
          severity = factor(severity,
@@ -70,7 +69,7 @@ summary_severity <- severity %>%
 
 write.csv(summary_severity, "data/summary_severity.csv")
 
-chisq.test(table(mortality$severity, mortality$sanatorium))
+chisq.test(table(severity$severity, severity$sanatorium))
 
 
 #### Barplot of severity distribution by treatment location
@@ -78,13 +77,13 @@ chisq.test(table(mortality$severity, mortality$sanatorium))
 ggplot(data = severity, aes(x = sanatorium, fill = severity)) +
   geom_bar(position = position_dodge()) +
   ylab("Number of Patients") +
-  xlab("Treatment Location") +
+  xlab("Setting") +
   scale_fill_manual(name = "Disease Severity",
                       breaks = c("Minimal", "Moderate", "Advanced"),
                       labels = c("Minimal", "Moderately\nadvanced",
                                  "Far advanced"),
-                      values = c("grey50", "grey30", "grey10")) +
+                      values = c("grey70", "grey40", "grey20")) +
   theme_bw()
   
-ggsave("Figures/severity_barchart.png", dpi = 300, width = 5, height = 4)
+ggsave("Figures/severity_barchart.png", dpi = 300, width = 5.5, height = 4)
           
