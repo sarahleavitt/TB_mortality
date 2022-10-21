@@ -53,7 +53,7 @@ write.csv(study_severity, "data/study_severity.csv")
 
 #### Summary table of severity distribution by treatment location
 
-summary_severity <- severity %>%
+summary_severity1 <- severity %>%
   group_by(sanatorium) %>%
   summarize(n = n(),
             Minimal_n = sum(severity == "Minimal"),
@@ -61,25 +61,34 @@ summary_severity <- severity %>%
             Advanced_n = sum(severity == "Advanced")) %>%
   mutate(Minimal_p = round(100 * Minimal_n / n, 1),
          Moderate_p = round(100 * Moderate_n / n, 1),
-         Advanced_p = round(100 * Advanced_n / n, 1),
-         Minimal = paste0(Minimal_n, " (", Minimal_p, "%)"),
+         Advanced_p = round(100 * Advanced_n / n, 1))
+
+summary_severity2 <- summary_severity1 %>%
+  mutate(Minimal = paste0(Minimal_n, " (", Minimal_p, "%)"),
          Moderate = paste0(Moderate_n, " (", Moderate_p, "%)"),
          Advanced = paste0(Advanced_n, " (", Advanced_p, "%)")) %>%
   select(sanatorium, Minimal, Moderate, Advanced)
 
-write.csv(summary_severity, "data/summary_severity.csv")
+write.csv(summary_severity2, "data/summary_severity.csv")
 
 chisq.test(table(severity$severity, severity$sanatorium))
 
 
 #### Barplot of severity distribution by treatment location
 
-ggplot(data = severity, aes(x = sanatorium, fill = severity)) +
-  geom_bar(position = position_dodge()) +
-  ylab("Number of Patients") +
+severity_plot <- summary_severity1 %>%
+  select(sanatorium, Minimal_p, Moderate_p, Advanced_p) %>%
+  pivot_longer(!sanatorium, names_to = "severity", values_to = "percent") %>%
+  mutate(severity = factor(severity,
+                           levels = c("Minimal_p", "Moderate_p", "Advanced_p")))
+
+ggplot(data = severity_plot, aes(x = sanatorium, y = percent,
+                                 fill = severity)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  ylab("Percentage of Patients") +
   xlab("Setting") +
   scale_fill_manual(name = "Disease Severity",
-                      breaks = c("Minimal", "Moderate", "Advanced"),
+                      breaks = c("Minimal_p", "Moderate_p", "Advanced_p"),
                       labels = c("Minimal", "Moderately\nadvanced",
                                  "Far advanced"),
                       values = c("grey70", "grey40", "grey20")) +
