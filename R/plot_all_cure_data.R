@@ -32,7 +32,7 @@ ggplot(cureData2[cureData2$severity2!="None",],
        aes(x=interval_r,y=cureRate,group=cohort_id,color=severity2))+
   geom_point(aes(shape=first_author))+geom_line()+xlim(0,10)+ylim(0,1)+
   labs(title="Studies with severity reported",
-       x="Year since diagnosis",y="Probability of Natural Recovery",color="Severity",shape="Author")+
+       x="Year since enrollment",y="Probability of Natural Recovery",color="Severity",shape="Author")+
   scale_color_brewer(palette="Dark2")
 
 # cure data by sanatorium versus not
@@ -40,7 +40,7 @@ ggplot(cureData2,
        aes(x=interval_r,y=cureRate,group=cohort_id,color=sanatorium.x))+
   geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
   labs(title="Natural recovery for Sanatorium and non-Sanatorium Studies",
-       x="Year since diagnosis",y="Probability of Natural Recovery",color="Sanatorium")+
+       x="Year since enrollment",y="Probability of Natural Recovery",color="Sanatorium")+
   scale_color_brewer(palette="Dark2")
 
 # cure data by time period
@@ -48,7 +48,7 @@ ggplot(cureData2,
        aes(x=interval_r,y=cureRate,group=cohort_id,color=time_period))+
   geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
   labs(title="Natural recovery by time period",
-       x="Year since diagnosis",y="Probability of Natural Recovery",color="Time Period")+
+       x="Year since enrollment",y="Probability of Natural Recovery",color="Time Period")+
   scale_color_brewer(palette="Dark2")
 
 # cure data by location
@@ -56,7 +56,7 @@ ggplot(cureData2,
        aes(x=interval_r,y=cureRate,group=cohort_id,color=location))+
   geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
   labs(title="Natural recovery by location",
-       x="Year since diagnosis",y="Probability of Natural Recovery",color="Location")+
+       x="Year since enrollment",y="Probability of Natural Recovery",color="Location")+
   scale_color_brewer(palette="Dark2")
 
 # combine together in one plot
@@ -65,7 +65,7 @@ ggplot(cureData2,
   geom_point(aes(shape=location))+
   geom_line(aes(linetype=time_period))+xlim(0,10)+ylim(0,1)+
   labs(title="Natural recovery data",
-       x="Year since diagnosis",y="Probability of Natural Recovery",color="Sanatorium",linetype="Time Period",
+       x="Year since enrollment",y="Probability of Natural Recovery",color="Sanatorium",linetype="Time Period",
        shape="Location")+
   scale_color_brewer(palette="Dark2")
 
