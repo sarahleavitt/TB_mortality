@@ -15,10 +15,10 @@ source("R/utils.R")
 reload_source()
 
 # Reading in the study_id correspondence table
-studyid <- read.csv("data/study_id.csv")
+studyid <- read.csv("~/GitHub/TB_mortality/data/study_id.csv")
 
 # Reading in cure data
-cureData <- read.csv("data/cure_data_all.csv")
+cureData <- read.csv("~/GitHub/TB_mortality/data/cure_data_all.csv")
 
 # add in author and date of study
 cureData2 <- inner_join(cureData,studyid,by="study_id")
@@ -37,7 +37,7 @@ ggplot(cureData2[cureData2$severity2!="None",],
 
 # cure data by sanatorium versus not
 ggplot(cureData2,
-       aes(x=interval_r,y=cureRate,group=cohort_id,color=sanatorium.x))+
+       aes(x=interval_r,y=cureRate,group=cohort_id,linetype=sanatorium.x))+
   geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
   labs(title="Natural recovery for Sanatorium and non-Sanatorium Studies",
        x="Year since enrollment",y="Probability of Natural Recovery",color="Sanatorium")+
@@ -45,7 +45,7 @@ ggplot(cureData2,
 
 # cure data by time period
 ggplot(cureData2,
-       aes(x=interval_r,y=cureRate,group=cohort_id,color=time_period))+
+       aes(x=interval_r,y=cureRate,group=cohort_id,linetype=time_period))+
   geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
   labs(title="Natural recovery by time period",
        x="Year since enrollment",y="Probability of Natural Recovery",color="Time Period")+
@@ -53,11 +53,11 @@ ggplot(cureData2,
 
 # cure data by location
 ggplot(cureData2,
-       aes(x=interval_r,y=cureRate,group=cohort_id,color=location))+
+       aes(x=interval_r,y=cureRate,group=cohort_id,linetype=location))+
   geom_point()+geom_line()+xlim(0,10)+ylim(0,1)+
   labs(title="Natural recovery by location",
-       x="Year since enrollment",y="Probability of Natural Recovery",color="Location")+
-  scale_color_brewer(palette="Dark2")
+       x="Year since enrollment",y="Probability of Natural Recovery",color="Location")
+
 
 # combine together in one plot
 ggplot(cureData2,
@@ -67,7 +67,7 @@ ggplot(cureData2,
   labs(title="Natural recovery data",
        x="Year since enrollment",y="Probability of Natural Recovery",color="Sanatorium",linetype="Time Period",
        shape="Location")+
-  scale_color_brewer(palette="Dark2")
+  scale_color_grey(start=0.6,end=0.1)
 
 
 
