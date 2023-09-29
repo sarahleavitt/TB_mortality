@@ -27,7 +27,7 @@ library(kableExtra)
 ## Background
 
 ```{r,include=FALSE}
-setwd("C:/Users/lfwhite/Documents/GitHub/pre_chemo_tb")
+setwd("C:/Users/lfwhite/Documents/GitHub/TB_mortality")
 
 source("R/utils.R")
 

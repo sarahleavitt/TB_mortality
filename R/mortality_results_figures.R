@@ -107,6 +107,29 @@ ggplot(pred_plot_all %>% filter(value != "median"),
 ggsave("Figures/forest_comb.png", width = 6.5, height = 4.5)
 
 
+# black/white version of forest plot
+ggplot(pred_plot_all %>% filter(value != "median"),
+       aes(x = est, y = author_time, xmin = cilb, xmax = ciub)) +
+  facet_grid(location ~ pred_label, scales = "free", space = "free") +
+  geom_point(aes(color = sanatorium)) +
+  geom_point(data = pred_plot_all %>% filter(shape == "Overall",
+                                             value != "median"),
+             color = 'black', shape = 18, size = 3) +
+  geom_errorbar(aes(color = sanatorium), width = 0.5) +
+  geom_errorbar(data = pred_plot_all %>% filter(shape == "Overall",
+                                                value != "median"),
+                width = 0.5) +
+  scale_x_continuous(name = "Survival Probability", limits = c(0, 1),
+                     breaks = c(0, 0.5, 1)) +
+  scale_colour_grey(name = "Setting", na.translate = FALSE,
+                    labels = c("Non-Sanatorium", "Sanatorium/hospital"))+
+  theme_bw() +
+  theme(axis.title.y = element_blank(),
+        legend.position = "bottom")
+
+ggsave("Figures/forest_comb_gray.png", width = 6.5, height = 4.5)
+
+
 
 # Forest plot for stratifications each separate
 pred_plot_time <- bind_rows(form_pre$pred_comb, form_post$pred_comb) %>%

@@ -174,7 +174,6 @@ output_yessan <- run_comp(yessan, n.iter = n.iter, n.burnin = n.burnin, n.thin =
 output_nosan <- run_comp(nosan, n.iter = n.iter, n.burnin = n.burnin, n.thin = n.thin)
 
 
-
 #### Formatting and Saving Results ---------------------------------------------
 
 data_comb <- getData(mortality_strata)
